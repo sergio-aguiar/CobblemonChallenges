@@ -119,6 +119,7 @@ This section explains how to set up and customize the **Daily Challenges** gui f
           time_of_day: any
           is_legendary: false
           is_ultra_beast: false
+          is_mythical: false
       ```
 
 5. **Reward Commands**
@@ -200,6 +201,7 @@ gui:
               time_of_day: any
               is_legendary: false
               is_ultra_beast: false
+              is_mythical: false
         rewards:
           commands:
             - "give {player} cobblemon:ultra_ball 16"

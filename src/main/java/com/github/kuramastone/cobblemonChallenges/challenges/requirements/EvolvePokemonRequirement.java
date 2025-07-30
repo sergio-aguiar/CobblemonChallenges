@@ -97,8 +97,6 @@ public class EvolvePokemonRequirement implements Requirement {
             boolean shiny = pokemon.getShiny();
             List<ElementalType> types = StreamSupport.stream(pokemon.getTypes().spliterator(), false).collect(Collectors.toUnmodifiableList());
             long time_of_day = event.getPokemon().getOwnerEntity().level().getDayTime();
-            boolean is_legendary = pokemon.isLegendary();
-            boolean is_ultra_beast = pokemon.isUltraBeast();
 
             if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), pokename)) {
                 return false;

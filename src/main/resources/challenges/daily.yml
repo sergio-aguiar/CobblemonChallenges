@@ -118,6 +118,7 @@ challenge-list:
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
+            is_mythical: false
       # These commands will be sent when all requirements have been completed.
       # {player} will be replaced with their username.
       rewards:
@@ -280,6 +281,7 @@ challenge-list:
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
+            is_mythical: false
       rewards:
         commands:
           - "give {player} cobblemon:rare_candy 3"
@@ -314,6 +316,7 @@ challenge-list:
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
+            is_mythical: false
       rewards:
         commands:
           - "give {player} cobblemon:rare_candy 3"

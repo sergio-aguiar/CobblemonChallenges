@@ -101,7 +101,7 @@ challenges:
 # ball/any: Can specify a type of Poké Ball or any.
 # amount: Represents the number of times an action should occur.
 # time_of_day: Required time to perform this event (morning, day, night).
-# is_legendary/is_ultra_beast: Boolean values for catching legendary or ultra beasts.
+# is_legendary/is_ultra_beast/is_mythical: Boolean values for catching legendary, ultra beast or mythical pokémon.
 # opponent_type: Specifies whether the opponent is wild, trainer, player, or a gym leader.
 # effectiveness: Describes effectiveness in battle (super-effective, normal, not-very-effective).
 # action: Can be mined, placed, craft, find, sell, buy, etc.
@@ -115,6 +115,7 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
   complete_challenge:
     amount: 1
     challenge-list: any # This is the challenge list it must come from
@@ -125,6 +126,7 @@ triggers:
     shiny: false
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
     effectiveness: any/1.0/0.5/2.0
     npc-player-gymleader-wild: any
   Evolve_Pokemon: # Evolve any pokemon
@@ -169,6 +171,7 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
   level_up_to: # When their level reaches a certain value
     target level: 100
     pokename: any
@@ -179,6 +182,7 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
   hatch_egg: # When an egg has finished hatching
     pokename: any
     shiny: false
@@ -188,6 +192,7 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
   trades_completed: # When the trade is completed. This is for the pokemon they sent themselves, not received.
     pokename: any
     shiny: false
@@ -197,6 +202,7 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
   exp_gained: # When exp is gained by a pokemon
     pokename: any
     shiny: false
@@ -206,4 +212,5 @@ triggers:
     time_of_day: any
     is_legendary: false
     is_ultra_beast: false
+    is_mythical: false
 

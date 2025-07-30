@@ -60,6 +60,7 @@ challenge-list:
             shiny: false
             is_legendary: true
             is_ultra_beast: false
+            is_mythical: false
             effectiveness: any
             npc-player-gymleader-wild: wild
       rewards:
@@ -97,6 +98,7 @@ challenge-list:
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
+            is_mythical: false
       rewards:
         commands:
           - "give {player} cobblemon:rare_candy 5"
@@ -130,6 +132,7 @@ challenge-list:
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
+            is_mythical: false
       rewards:
         commands:
           - "give {player} cobblemon:rare_candy 2"

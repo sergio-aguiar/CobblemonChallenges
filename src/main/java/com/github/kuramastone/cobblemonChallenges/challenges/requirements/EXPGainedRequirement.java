@@ -36,6 +36,8 @@ public class EXPGainedRequirement implements Requirement {
     private boolean is_legendary = false;
     @YamlKey("is_ultra_beast")
     private boolean is_ultra_beast = false;
+    @YamlKey("is_mythical")
+    private boolean is_mythical = false;
 
     public EXPGainedRequirement() {
     }
@@ -99,6 +101,7 @@ public class EXPGainedRequirement implements Requirement {
             long time_of_day = event.getPokemon().getOwnerEntity().level().getDayTime();
             boolean is_legendary = pokemon.isLegendary();
             boolean is_ultra_beast = pokemon.isUltraBeast();
+            boolean is_mythical = pokemon.isMythical();
 
             if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), pokename)) {
                 return false;
@@ -123,11 +126,14 @@ public class EXPGainedRequirement implements Requirement {
                 return false;
             }
 
-            if (requirement.is_legendary && !is_legendary) {
-                return false;
-            }
+            boolean hasAnyRequirement = requirement.is_legendary || requirement.is_ultra_beast || requirement.is_mythical;
 
-            if (requirement.is_ultra_beast && !is_ultra_beast) {
+            boolean passesAny =
+                (requirement.is_legendary && is_legendary) ||
+                (requirement.is_ultra_beast && is_ultra_beast) ||
+                (requirement.is_mythical && is_mythical);
+
+            if (hasAnyRequirement && !passesAny) {
                 return false;
             }
 

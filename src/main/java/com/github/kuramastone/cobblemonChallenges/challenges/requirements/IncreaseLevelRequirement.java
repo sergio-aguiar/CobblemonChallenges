@@ -82,15 +82,15 @@ public class IncreaseLevelRequirement implements Requirement {
         @Override
         public void progress(Object obj) {
             if (matchesMethod(obj)) {
-                if (meetsCriteria(getType().cast(obj))) {
-                    progressAmount++;
+                LevelUpEvent event = getType().cast(obj);
+                if (meetsCriteria(event)) {
+                    progressAmount += event.getNewLevel() - event.getOldLevel();
                 }
             }
         }
 
         @Override
         public boolean meetsCriteria(LevelUpEvent event) {
-
             Pokemon pokemon = event.getPokemon();
             String pokename = pokemon.getSpecies().getName();
             boolean shiny = pokemon.getShiny();

@@ -110,6 +110,10 @@ public class DefeatBattlerRequirement implements Requirement {
             if(!event.getWinners().contains(player))
                 return false;
 
+            // return if it was a wild catch
+            if (event.getWasWildCapture())
+                return false;
+
             // check npc/player/gymleader/wild
             StringBuilder enemyType = new StringBuilder();
             List<BattlePokemon> enemyPokemon = new ArrayList<>();

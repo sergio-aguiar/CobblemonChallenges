@@ -176,6 +176,15 @@ public class SimpleWindow {
 
     public SimpleWindow setContents(List<WindowItem> contents) {
         this.contents = contents;
+
+        if (this.contents != null) {
+            for (WindowItem item : this.contents) {
+                if (item != null) {
+                    item.setAutoUpdate(20, () -> true);
+                }
+            }
+        }
+
         return this;
     }
 

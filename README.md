@@ -103,7 +103,7 @@ This section explains how to set up and customize the **Daily Challenges** gui f
         - Use placeholders for additional information:
             - `{progression_status}`: Current challenge progress.
             - `{description}`: The description defined earlier.
-            - `{tracking-tag}`: Countdown timer for challenge expiration.
+            - `{tracking-tag}`: Countdown timer for challenge expiration/cooldown.
 
 4. **Challenge Requirements**
     - **`requirements`**: The requirements needed to complete the challenge. Each task is listed under a unique numeric key to keep them sorted and allow duplicates.

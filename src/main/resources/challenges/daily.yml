@@ -61,7 +61,7 @@ challenge-list:
         name: "&e&lLogin Daily"
         # {progression_status} can be customized in config.yml under Messages
         # {description} is the same as shown above
-        # {tracking-tag} is the countdown timer before a challenge has expired and must be restarted.
+        # {tracking-tag} is the countdown timer before a challenge has expired and must be restarted/can be retaken after the cooldown ending.
         lore:
           - "{progression_status}"
           - " "
@@ -98,7 +98,7 @@ challenge-list:
         name: "&e&lCatch 10 Pokémon"
         # {progression_status} can be customized in config.yml under Messages
         # {description} is the same as shown above
-        # {tracking-tag} is the countdown timer before a challenge has expired and must be restarted.
+        # {tracking-tag} is the countdown timer before a challenge has expired and must be restarted/can be retaken after the cooldown ending.
         lore:
           - "{progression_status}"
           - " "

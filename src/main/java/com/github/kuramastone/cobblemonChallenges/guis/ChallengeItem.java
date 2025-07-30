@@ -4,6 +4,7 @@ import com.github.kuramastone.bUtilities.ComponentEditor;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
+import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.gui.ItemProvider;
 import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
@@ -40,42 +41,63 @@ public class ChallengeItem implements ItemProvider {
         //format lore
         List<String> lore = new ArrayList<>();
         for (String line : challenge.getDisplayConfig().getLore()) {
+            // Handle {tracking-tag} separately if it exists in the line
+            if (line.contains("{tracking-tag}")) {
+                List<String> tagLines = new ArrayList<>();
+
+                if (!challenge.doesNeedSelection()) {
+                    // No selection → no timer tag
+                    tagLines = List.of(); // or skip
+                } else if (profile.isChallengeCompleted(challenge.getName())) {
+                    // Challenge completed → check cooldown
+                    long lastCompleted = profile.getCompletedChallenges().stream()
+                        .filter(c -> c.challengeID().equals(challenge.getName()))
+                        .findFirst()
+                        .map(c -> c.timeCompleted())
+                        .orElse(0L);
+                    long elapsed = System.currentTimeMillis() - lastCompleted;
+                    long cooldown = challenge.getRepeatableEveryMilliseconds();
+                    long remaining = cooldown - elapsed;
+
+                    if (remaining > 0) {
+                        tagLines = List.of(StringUtils.splitByLineBreak(
+                            api.getMessage("challenges.tracking-tag.cooldown", "{time-remaining}", StringUtils.formatSecondsToString(remaining / 1000)).getText()
+                        ));
+                    } else {
+                        tagLines = List.of(StringUtils.splitByLineBreak(
+                            api.getMessage("challenges.tracking-tag.before-starting").getText()
+                        ));
+                    }
+
+                } else if (profile.isChallengeInProgress(challenge.getName())) {
+                    long remaining = profile.getActiveChallengeProgress(challenge.getName()).getTimeRemaining();
+                    tagLines = List.of(StringUtils.splitByLineBreak(
+                        api.getMessage("challenges.tracking-tag.after-starting", "{time-remaining}", StringUtils.formatSecondsToString(remaining / 1000)).getText()
+                    ));
+                } else {
+                    long remaining = challenge.getMaxTimeInMilliseconds();
+                    tagLines = List.of(StringUtils.splitByLineBreak(
+                        api.getMessage("challenges.tracking-tag.before-starting", "{time-remaining}", StringUtils.formatSecondsToString(remaining / 1000)).getText()
+                    ));
+                }
+
+                lore.addAll(tagLines);
+                continue;
+            }
+
+            // Handle other replacements
             String[] replacements = {
-                    "{progression_status}", null,
-                    "{description}", challenge.getDescription(),
-                    "{tracking-tag}", null
+                "{progression_status}", null,
+                "{description}", challenge.getDescription()
             };
 
-            // insert correct tracking tag
-            if(challenge.doesNeedSelection()) {
-                if (profile.isChallengeInProgress(challenge.getName())) {
-                    long timeRemaining = profile.getActiveChallengeProgress(challenge.getName()).getTimeRemaining();
-                    replacements[5] = api.getMessage("challenges.tracking-tag.after-starting", "{time-remaining}",
-                            StringUtils.formatSecondsToString(timeRemaining / 1000)).getText();
-                }
-                else {
-                    long timeRemaining = challenge.getMaxTimeInMilliseconds();
-                    replacements[5] = api.getMessage("challenges.tracking-tag.before-starting", "{time-remaining}",
-                            StringUtils.formatSecondsToString(timeRemaining / 1000)).getText();
-                }
-            }
-
-            // insert correct progress tag
             if (profile.isChallengeCompleted(challenge.getName())) {
                 replacements[1] = api.getMessage("challenges.progression_status.post-completion").getText();
-                replacements[5] = ""; // remove tracking tag if completed
-            }
-            else if (profile.isChallengeInProgress(challenge.getName())) {
+            } else if (profile.isChallengeInProgress(challenge.getName())) {
                 String progressLines = profile.getActiveChallengeProgress(challenge.getName()).getProgressListAsString();
                 replacements[1] = api.getMessage("challenges.progression_status.during-attempt").getText() + "\n" + progressLines;
-            }
-            else {
+            } else {
                 replacements[1] = api.getMessage("challenges.progression_status.before-attempt").getText();
-            }
-
-            // remove tracking tag if no timer needed
-            if(!challenge.doesNeedSelection()) {
-                replacements[5] = "";
             }
 
             for (int i = 0; i < replacements.length; i += 2) {
@@ -83,10 +105,9 @@ public class ChallengeItem implements ItemProvider {
                     line = line.replace(replacements[i], replacements[i + 1]);
             }
 
-            List<String> lines = new ArrayList<>(List.of(StringUtils.splitByLineBreak(line)));
-
-            lore.addAll(lines);
+            lore.addAll(List.of(StringUtils.splitByLineBreak(line)));
         }
+        
 
         lore = StringUtils.centerStringListTags(lore);
 

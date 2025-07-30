@@ -53,6 +53,9 @@ Messages:
       after-starting:
         - "<center>&6&lTRACKING"
         - "<center>&e&l{time-remaining}"
+      cooldown:
+        - "<center>&c&lON COOLDOWN"
+        - "<center>&e&lAvailable again in: {time-remaining}"
 
 # This is the menu where each challenge list is displayed.
 # Here you can move the lists and add new ones.

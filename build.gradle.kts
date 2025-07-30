@@ -84,7 +84,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
-    implementation(files("libs/BUtilities-Core-1.1.1a.jar"))
+    shade(files("libs/BUtilities-Core-1.1.1a.jar"))
 
     // includeAndImplement("com.github.kuramastone:BUtilities-Core:$bUtilitiesVersion")
     includeAndImplement("net.kyori:adventure-api:4.17.0")

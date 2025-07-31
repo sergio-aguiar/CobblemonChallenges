@@ -1,6 +1,5 @@
 package com.github.kuramastone.cobblemonChallenges.player;
 
-import com.cobblemon.mod.common.Cobblemon;
 import com.github.kuramastone.bUtilities.ComponentEditor;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
@@ -13,8 +12,6 @@ import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.core.appender.rewrite.RewriteAppender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -34,9 +31,9 @@ public class PlayerProfile {
         this.api = api;
         this.uuid = uuid;
 
-        activeChallenges = new HashMap<>();
-        completedChallenges = new ArrayList<>();
-        rewardsToGive = new ArrayList<>();
+        activeChallenges = Collections.synchronizedMap(new HashMap<>());
+        completedChallenges = Collections.synchronizedList(new ArrayList<>());
+        rewardsToGive = Collections.synchronizedList(new ArrayList<>());
 
         server = CobbleChallengeMod.getMinecraftServer();
         syncPlayer(); // try syncing player object

@@ -3,7 +3,6 @@ package com.github.kuramastone.cobblemonChallenges.utils;
 import com.github.kuramastone.bUtilities.ComponentEditor;
 import com.github.kuramastone.bUtilities.configs.ItemConfig;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.network.chat.Component;

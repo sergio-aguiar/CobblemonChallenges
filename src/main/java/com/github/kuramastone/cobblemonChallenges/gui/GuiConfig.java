@@ -1,7 +1,6 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.bUtilities.configs.ItemConfig;
-import com.github.kuramastone.bUtilities.yaml.Mapper;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;

@@ -1,11 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.bUtilities.configs.ItemConfig;
-import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
-import net.kyori.adventure.text.Component;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.List;
 
 public interface ItemProvider {
 

@@ -1,17 +1,14 @@
 package com.github.kuramastone.cobblemonChallenges.guis;
 
-import com.github.kuramastone.bUtilities.ComponentEditor;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
-import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.gui.ItemProvider;
 import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.ItemUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;

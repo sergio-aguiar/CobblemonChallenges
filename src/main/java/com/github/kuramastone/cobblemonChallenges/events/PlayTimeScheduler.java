@@ -6,10 +6,6 @@ import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 public class PlayTimeScheduler {
 
     private static long currentTick = 0;

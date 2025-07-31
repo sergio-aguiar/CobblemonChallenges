@@ -1,18 +1,5 @@
 package com.github.kuramastone.cobblemonChallenges.utils;
 
-import com.cobblemon.mod.common.Cobblemon;
-import com.cobblemon.mod.common.api.data.JsonDataRegistry;
-import com.cobblemon.mod.common.api.moves.Move;
-import com.cobblemon.mod.common.api.moves.MoveSet;
-import com.cobblemon.mod.common.api.moves.MoveTemplate;
-import com.cobblemon.mod.common.api.moves.animations.ActionEffectContext;
-import com.cobblemon.mod.common.api.moves.animations.ActionEffects;
-import com.cobblemon.mod.common.pokemon.Pokemon;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.Potions;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,9 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.bUtilities.ComponentEditor;
-import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

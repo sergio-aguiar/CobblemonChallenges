@@ -12,10 +12,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 public class CobbleChallengeMod implements ModInitializer {
 
@@ -35,7 +37,7 @@ public class CobbleChallengeMod implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> onStopped());
         startSaveScheduler();
         startRepeatableScheduler();
-        CommandHandler.register(); // register commands
+        CommandHandler.register();
         registerTrackedEvents();
     }
 
@@ -46,14 +48,14 @@ public class CobbleChallengeMod implements ModInitializer {
 
 
     private void startSaveScheduler() {
-        TickScheduler.scheduleRepeating(20*60*15, ()-> {
-            api.saveProfiles();
+        TickScheduler.scheduleRepeating(20 * 60 * 30, () -> {
+            CompletableFuture.runAsync(() -> api.saveProfiles());
             return true;
         });
     }
 
     private void startRepeatableScheduler() {
-        TickScheduler.scheduleRepeating(20, ()-> {
+        TickScheduler.scheduleRepeating(20, () -> {
 
             for (PlayerProfile profile : api.getProfiles()) {
                 profile.refreshRepeatableChallenges();

@@ -139,7 +139,6 @@ triggers:
     type: any
     ball: any
     time_of_day: any
-
   mine_block: # When a block is broken
     type: any/stone
     amount: 5
@@ -216,4 +215,3 @@ triggers:
     is_legendary: false
     is_ultra_beast: false
     is_mythical: false
-

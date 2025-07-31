@@ -1,7 +1,6 @@
 package com.github.kuramastone.cobblemonChallenges.guis;
 
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
-import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.MilestoneTimePlayedRequirement;

@@ -9,7 +9,6 @@ import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
-import java.io.EOFException;
 import java.util.UUID;
 
 public class PokemonScannedRequirement implements Requirement {

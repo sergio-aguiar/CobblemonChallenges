@@ -1,7 +1,6 @@
 package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 
 import com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedPostEvent;
-import com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedPostEvent;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;

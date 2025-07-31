@@ -7,9 +7,7 @@ import com.github.kuramastone.cobblemonChallenges.RequirementLoader;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.Requirement;
 import com.github.kuramastone.cobblemonChallenges.challenges.reward.CommandReward;
 import com.github.kuramastone.cobblemonChallenges.challenges.reward.Reward;
-import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

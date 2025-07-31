@@ -2,7 +2,6 @@ package com.github.kuramastone.cobblemonChallenges.events;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.server.MinecraftServer;
 
 // Call this when the server is starting, not after
 public interface RegisterRequirementsEvent {

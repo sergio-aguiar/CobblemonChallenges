@@ -1,7 +1,5 @@
 package com.github.kuramastone.cobblemonChallenges.player;
 
-import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.*;
 import com.github.kuramastone.cobblemonChallenges.events.ChallengeCompletedEvent;
 import com.github.kuramastone.cobblemonChallenges.listeners.ChallengeListener;

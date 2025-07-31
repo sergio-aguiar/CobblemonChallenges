@@ -7,8 +7,6 @@ import com.github.kuramastone.bUtilities.yaml.YamlObject;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.events.RegisterMessagesEvent;
 import com.github.kuramastone.cobblemonChallenges.gui.GuiConfig;
-import com.github.kuramastone.cobblemonChallenges.gui.ItemProvider;
-import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.File;

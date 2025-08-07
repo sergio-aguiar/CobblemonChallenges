@@ -37,6 +37,7 @@ public class CobbleChallengeMod implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> onStopped());
         startSaveScheduler();
         startRepeatableScheduler();
+        startExpirationScheduler();
         CommandHandler.register();
         registerTrackedEvents();
     }
@@ -56,11 +57,18 @@ public class CobbleChallengeMod implements ModInitializer {
 
     private void startRepeatableScheduler() {
         TickScheduler.scheduleRepeating(20, () -> {
-
             for (PlayerProfile profile : api.getProfiles()) {
                 profile.refreshRepeatableChallenges();
             }
+            return true;
+        });
+    }
 
+    private void startExpirationScheduler() {
+        TickScheduler.scheduleRepeating(20, () -> {
+            for (PlayerProfile profile : api.getProfiles()) {
+                profile.resetExpiredChallenges();
+            }
             return true;
         });
     }

@@ -257,6 +257,17 @@ public class PlayerProfile {
         }
     }
 
+    public void resetExpiredChallenges() {
+        for (ChallengeList challengeList : new ArrayList<>(api.getChallengeLists())) {
+            for (ChallengeProgress cp : new ArrayList<>(activeChallenges.getOrDefault(challengeList.getName(), Collections.emptyList()))) {
+                if (cp.hasTimeRanOut()) {
+                    CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), uuid);
+                    activeChallenges.get(challengeList.getName()).remove(cp);
+                }
+            }
+        }
+    }
+
     public void resetChallenges() {
         resetProgress();
         completedChallenges.clear();

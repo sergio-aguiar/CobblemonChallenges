@@ -2,11 +2,18 @@ package com.github.kuramastone.cobblemonChallenges;
 
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
+import com.github.kuramastone.bUtilities.ComponentEditor;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
+import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
+import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.commands.CommandHandler;
 import com.github.kuramastone.cobblemonChallenges.events.*;
 import com.github.kuramastone.cobblemonChallenges.listeners.ChallengeListener;
 import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
+import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -17,6 +24,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class CobbleChallengeMod implements ModInitializer {
@@ -57,21 +69,135 @@ public class CobbleChallengeMod implements ModInitializer {
 
     private void startRepeatableScheduler() {
         TickScheduler.scheduleRepeating(20, () -> {
-            for (PlayerProfile profile : api.getProfiles()) {
-                profile.refreshRepeatableChallenges();
-            }
+            CompletableFuture.runAsync(() -> {
+                List<Runnable> tasksToRun = new ArrayList<>();
+
+                for (PlayerProfile profile : api.getProfiles()) {
+                    if (profile.isOnline()) {
+                        List<CompletedChallenge> challengesToRemove = new ArrayList<>();
+
+                        for (CompletedChallenge completedChallenge : new ArrayList<>(profile.getCompletedChallenges())) {
+                            ChallengeList challengeList = api.getChallengeList(completedChallenge.challengeListID());
+
+                            if (challengeList != null) {
+                                Challenge challenge = challengeList.getChallenge(completedChallenge.challengeID());
+
+                                if (challenge != null && challenge.isRepeatable()) {
+                                    long timeSinceCompleted = System.currentTimeMillis() - completedChallenge.timeCompleted();
+
+                                    if (timeSinceCompleted >= challenge.getRepeatableEveryMilliseconds()) {
+                                        challengesToRemove.add(completedChallenge);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!challengesToRemove.isEmpty()) {
+                            tasksToRun.add(() -> {
+                                profile.getCompletedChallenges().removeAll(challengesToRemove);
+
+                                for (CompletedChallenge cc : challengesToRemove) {
+                                    ChallengeList cl = api.getChallengeList(cc.challengeListID());
+                                    Challenge ch = cl != null ? cl.getChallenge(cc.challengeID()) : null;
+                                    if (ch != null) {
+                                        List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                            api.getMessage(
+                                                "challenges.offcooldown",
+                                                "{challenge}", ch.getName(),
+                                                "{challenge-description}", ch.getDescription()
+                                            ).getText()
+                                        ));
+                                        List<String> formatted = StringUtils.centerStringListTags(lines);
+                                        for (String line : formatted) {
+                                            profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
+                CobbleChallengeMod.getMinecraftServer().execute(() -> {
+                    for (Runnable task : tasksToRun) {
+                        try {
+                            task.run();
+                        } catch (Exception e) {
+                            CobbleChallengeMod.logger.error("Error during repeatable challenge task execution.");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            });
+
             return true;
         });
     }
 
     private void startExpirationScheduler() {
         TickScheduler.scheduleRepeating(20, () -> {
-            for (PlayerProfile profile : api.getProfiles()) {
-                profile.resetExpiredChallenges();
-            }
+            CompletableFuture.runAsync(() -> {
+                List<Runnable> tasksToRun = new ArrayList<>();
+
+                for (PlayerProfile profile : api.getProfiles()) {
+                    if (profile.isOnline()) {
+                        Map<String, List<ChallengeProgress>> expiredChallenges = new HashMap<>();
+
+                        for (ChallengeList challengeList : new ArrayList<>(api.getChallengeLists())) {
+                            String listName = challengeList.getName();
+                            List<ChallengeProgress> cps = new ArrayList<>(profile.getActiveChallengesMap().getOrDefault(listName, Collections.emptyList()));
+
+                            for (ChallengeProgress cp : cps) {
+                                if (cp.hasTimeRanOut()) {
+                                    expiredChallenges.computeIfAbsent(listName, k -> new ArrayList<>()).add(cp);
+                                }
+                            }
+                        }
+
+                        if (!expiredChallenges.isEmpty()) {
+                            tasksToRun.add(() -> {
+                                for (Map.Entry<String, List<ChallengeProgress>> entry : expiredChallenges.entrySet()) {
+                                    List<ChallengeProgress> list = profile.getActiveChallengesMap().get(entry.getKey());
+                                    if (list != null) {
+                                        for (ChallengeProgress cp : entry.getValue()) {
+                                            CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());
+                                            list.remove(cp);
+
+                                            List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                api.getMessage(
+                                                    "challenges.expired",
+                                                    "{challenge}", cp.getActiveChallenge().getName(),
+                                                    "{challenge-description}", cp.getActiveChallenge().getDescription()
+                                                ).getText()
+                                            ));
+                                            List<String> formatted = StringUtils.centerStringListTags(lines);
+                                            for (String line : formatted) {
+                                                profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
+                CobbleChallengeMod.getMinecraftServer().execute(() -> {
+                    for (Runnable task : tasksToRun) {
+                        try {
+                            task.run();
+                        } catch (Exception e) {
+                            CobbleChallengeMod.logger.error("Error during repeatable challenge task execution.");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            });
+
             return true;
         });
     }
+
 
     private void onStopped() {
         api.saveProfiles();

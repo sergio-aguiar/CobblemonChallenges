@@ -40,6 +40,16 @@ Messages:
       - "<center>&6&l{challenge}"
       - "                                 "
       - "{challenge-description}"
+    offcooldown:
+      - "<center>&e[Challenge Refreshed]"
+      - "<center>&6&l{challenge}"
+      - "                                 "
+      - "{challenge-description}"
+    expired:
+      - "<center>&e[Challenge Expired]"
+      - "<center>&6&l{challenge}"
+      - "                                 "
+      - "{challenge-description}"
     progression_status:
       before-attempt: "&eCan be attempted"
       during-attempt: "&2Currently in progress"

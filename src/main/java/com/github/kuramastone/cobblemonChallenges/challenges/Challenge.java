@@ -16,6 +16,7 @@ import java.util.List;
 public class Challenge {
 
     private String name;
+    private String displayName;
     private ItemConfig displayItem;
     private List<Reward> rewards;
     private List<Requirement> requirements;
@@ -25,9 +26,10 @@ public class Challenge {
     private long maxTimeInMilliseconds; // how long does the player have to complete this? -1 for infinite time
     private long repeatableEveryMilliseconds = -1; // how often this challenge can be completed. -1 for only once
 
-    public Challenge(String name, List<Reward> rewards, List<Requirement> requirements, ItemConfig displayItem,
+    public Challenge(String name, String displayName, List<Reward> rewards, List<Requirement> requirements, ItemConfig displayItem,
                      boolean needsSelection, long maxTimeInMilliseconds, String description, long repeatableEveryMilliseconds) {
         this.name = name;
+        this.displayName = displayName;
         this.rewards = rewards;
         this.requirements = requirements;
         this.displayItem = displayItem;
@@ -38,7 +40,7 @@ public class Challenge {
     }
 
     public static @Nullable Challenge load(String challengeID, YamlConfig section) {
-
+        String displayName = section.get("display-name", challengeID);
         boolean needsSelection = section.get("needs-selection", false);
         long timeToComplete = StringUtils.stringToMilliseconds(section.get("time-limit", "-1"));
         ItemConfig displayItem = new ItemConfig(section.getSection("display-item"));
@@ -68,7 +70,7 @@ public class Challenge {
 
         String description = StringUtils.collapseWithNextLines(section.getStringList("description"));
 
-        return new Challenge(challengeID, rewards, requirementList, displayItem, needsSelection, timeToComplete, description, repeatableEveryMilliseconds);
+        return new Challenge(challengeID, displayName, rewards, requirementList, displayItem, needsSelection, timeToComplete, description, repeatableEveryMilliseconds);
     }
 
     public long getRepeatableEveryMilliseconds() {
@@ -81,6 +83,10 @@ public class Challenge {
 
     public String getName() {
         return name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public ItemConfig getDisplayConfig() {

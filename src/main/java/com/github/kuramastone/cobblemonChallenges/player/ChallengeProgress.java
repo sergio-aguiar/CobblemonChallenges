@@ -113,7 +113,7 @@ public class ChallengeProgress {
     }
 
     public void timeRanOut() {
-        profile.sendMessage(api.getMessage("challenges.failure.time-ran-out", "{challenge}", activeChallenge.getName()).build());
+        profile.sendMessage(api.getMessage("challenges.failure.time-ran-out", "{challenge}", activeChallenge.getDisplayName()).build());
         profile.removeActiveChallenge(this);
     }
 

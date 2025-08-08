@@ -104,7 +104,7 @@ public class CobbleChallengeMod implements ModInitializer {
                                         List<String> lines = List.of(StringUtils.splitByLineBreak(
                                             api.getMessage(
                                                 "challenges.offcooldown",
-                                                "{challenge}", ch.getName(),
+                                                "{challenge}", ch.getDisplayName(),
                                                 "{challenge-description}", ch.getDescription()
                                             ).getText()
                                         ));
@@ -167,7 +167,7 @@ public class CobbleChallengeMod implements ModInitializer {
                                             List<String> lines = List.of(StringUtils.splitByLineBreak(
                                                 api.getMessage(
                                                     "challenges.expired",
-                                                    "{challenge}", cp.getActiveChallenge().getName(),
+                                                    "{challenge}", cp.getActiveChallenge().getDisplayName(),
                                                     "{challenge-description}", cp.getActiveChallenge().getDescription()
                                                 ).getText()
                                             ));

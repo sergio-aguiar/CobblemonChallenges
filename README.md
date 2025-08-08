@@ -92,6 +92,7 @@ This section explains how to set up and customize the **Daily Challenges** gui f
 2. **Defining Individual Challenges**
    Each challenge is listed under **`challenges`**, with unique identifiers as the key.
 
+    - **`display-name`**: Text shown in challenge completion/expiration/refresh messages. Default to the challenge name/id if missing.
     - **`needs-selection`**: If `true`, the player must manually start the challenge by clicking the itemstack.
     - **`time-limit`**: Duration for the challenge, formatted as `30d24h60m60s` (days, hours, minutes, seconds).
     - **`description`**: Text shown in the GUI and completion messages.
@@ -173,6 +174,7 @@ gui:
     max-challenges-per-player: 1
     challenges:
       "Catching Challenge":
+        display-name: "Catching Pokémon Challenge"
         needs-selection: true
         time-limit: "24h"
         description:

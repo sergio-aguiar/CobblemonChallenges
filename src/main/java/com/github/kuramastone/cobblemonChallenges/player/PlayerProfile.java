@@ -141,7 +141,7 @@ public class PlayerProfile {
         rewardsToGive.addAll(challenge.getRewards());
 
         dispenseRewards();
-        List<String> linesToSend = List.of(StringUtils.splitByLineBreak(api.getMessage("challenges.completed", "{challenge}", challenge.getName(), "{challenge-description}", challenge.getDescription()).getText()));
+        List<String> linesToSend = List.of(StringUtils.splitByLineBreak(api.getMessage("challenges.completed", "{challenge}", challenge.getDisplayName(), "{challenge-description}", challenge.getDescription()).getText()));
         List<String> formattedLines = StringUtils.centerStringListTags(linesToSend);
         for (String line : formattedLines) {
             sendMessage(ComponentEditor.decorateComponent(line));

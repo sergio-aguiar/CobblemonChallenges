@@ -80,6 +80,8 @@ challenge-list:
 
 
     "Catching Challenge":
+      # If this tag is missing, the default challenge name/id will be used.
+      display-name: "Catching Pokémon Challenge"
       # If set to false, this challenge does not need to be clicked in order to be started.
       needs-selection: true
       # The time limit to complete this challenge accepts 30d24h60m60s format.

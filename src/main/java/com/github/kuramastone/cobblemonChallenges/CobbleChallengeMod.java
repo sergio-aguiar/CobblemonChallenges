@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class CobbleChallengeMod implements ModInitializer {
 
@@ -62,7 +63,7 @@ public class CobbleChallengeMod implements ModInitializer {
 
     private void startSaveScheduler() {
         TickScheduler.scheduleRepeating(20 * 60 * 30, () -> {
-            CompletableFuture.runAsync(() -> api.saveProfiles());
+            CompletableFuture.runAsync(() -> api.saveProfiles(), ChallengeExecutors.CHALLENGE_EXECUTOR);
             return true;
         });
     }
@@ -128,7 +129,7 @@ public class CobbleChallengeMod implements ModInitializer {
                         }
                     }
                 });
-            });
+            }, ChallengeExecutors.CHALLENGE_EXECUTOR);
 
             return true;
         });
@@ -192,7 +193,7 @@ public class CobbleChallengeMod implements ModInitializer {
                         }
                     }
                 });
-            });
+            }, ChallengeExecutors.CHALLENGE_EXECUTOR);
 
             return true;
         });
@@ -201,6 +202,19 @@ public class CobbleChallengeMod implements ModInitializer {
 
     private void onStopped() {
         api.saveProfiles();
+        shutdownChallengeExecutor();
+    }
+
+    private void shutdownChallengeExecutor() {
+        ChallengeExecutors.CHALLENGE_EXECUTOR.shutdown();
+        try {
+            if (!ChallengeExecutors.CHALLENGE_EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
+                ChallengeExecutors.CHALLENGE_EXECUTOR.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            ChallengeExecutors.CHALLENGE_EXECUTOR.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void registerTrackedEvents() {

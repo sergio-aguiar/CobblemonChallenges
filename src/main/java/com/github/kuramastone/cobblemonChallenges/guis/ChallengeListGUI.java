@@ -7,10 +7,12 @@ import com.github.kuramastone.cobblemonChallenges.challenges.requirements.Milest
 import com.github.kuramastone.cobblemonChallenges.gui.GuiConfig;
 import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
+
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ChallengeListGUI {
 
@@ -30,28 +32,51 @@ public class ChallengeListGUI {
 
     private void build() {
         List<WindowItem> contents = new ArrayList<>();
+        boolean usingPools = api.getConfigOptions().isUsingPools();
 
-        //window is already built aesthetically, but now we need to insert each challenge
-        for (Challenge challenge : challengeList.getChallengeMap()) {
-            WindowItem item = new WindowItem(window, new ChallengeItem(window, profile, challenge));
-            if (challenge.doesNeedSelection() && profile.isChallengeInProgress(challenge.getName()))
-                item.setAutoUpdate(15, () ->
-                        // check if this challenge requirement should auto-update
-                        challenge.getRequirements().stream().anyMatch(it -> it instanceof MilestoneTimePlayedRequirement)
-                                // check if challenge has a timer that needs ticking
-                                || profile.isChallengeInProgress(challenge.getName())
-                );
-            item.setRunnableOnClick(onChallengeClick(challenge, item));
-            contents.add(item);
+        if (usingPools) {
+            Map<Integer, Challenge> assignedSlots = profile.getAvailableSlotChallengesForList(challengeList.getName());
+
+            for (Map.Entry<Integer, Challenge> slotChallenge : assignedSlots.entrySet()) {
+                int slot = slotChallenge.getKey();
+                Challenge challenge = slotChallenge.getValue();
+
+                if (challenge == null || slot <= 0) continue;
+
+                WindowItem item = new WindowItem(window, new ChallengeItem(window, profile, challenge));
+
+                if (challenge.doesNeedSelection() && profile.isChallengeInProgress(challenge.getName())) {
+                    item.setAutoUpdate(15, () ->
+                            challenge.getRequirements().stream().anyMatch(it -> it instanceof MilestoneTimePlayedRequirement)
+                                    || profile.isChallengeInProgress(challenge.getName()));
+                }
+
+                item.setRunnableOnClick(onChallengeClick(challenge, item, slot));
+                contents.add(item);
+            }
+        } else {
+            //window is already built aesthetically, but now we need to insert each challenge
+            for (Challenge challenge : challengeList.getChallengeMap()) {
+                WindowItem item = new WindowItem(window, new ChallengeItem(window, profile, challenge));
+                if (challenge.doesNeedSelection() && profile.isChallengeInProgress(challenge.getName()))
+                    item.setAutoUpdate(15, () ->
+                            // check if this challenge requirement should auto-update
+                            challenge.getRequirements().stream().anyMatch(it -> it instanceof MilestoneTimePlayedRequirement)
+                                    // check if challenge has a timer that needs ticking
+                                    || profile.isChallengeInProgress(challenge.getName())
+                    );
+                item.setRunnableOnClick(onChallengeClick(challenge, item, -1));
+                contents.add(item);
+            }
         }
 
         window.setContents(contents);
     }
 
-    private Runnable onChallengeClick(Challenge challenge, WindowItem item) {
+    private Runnable onChallengeClick(Challenge challenge, WindowItem item, int slot) {
         return () -> {
             if (!profile.isChallengeInProgress(challenge.getName()) && !profile.isChallengeCompleted(challenge.getName()) && challenge.doesNeedSelection()) {
-                profile.addActiveChallenge(challengeList, challenge);
+                profile.addActiveChallenge(challengeList, challenge, slot);
                 profile.checkCompletion(challengeList);
                 item.setAutoUpdate(10, () -> true); // set to auto update to allow timer to keep updating
                 item.notifyWindow();

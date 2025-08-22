@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -101,16 +102,45 @@ public class CobbleChallengeMod implements ModInitializer {
                                     ChallengeList cl = api.getChallengeList(cc.challengeListID());
                                     Challenge ch = cl != null ? cl.getChallenge(cc.challengeID()) : null;
                                     if (ch != null) {
-                                        List<String> lines = List.of(StringUtils.splitByLineBreak(
-                                            api.getMessage(
-                                                "challenges.offcooldown",
-                                                "{challenge}", ch.getDisplayName(),
-                                                "{challenge-description}", ch.getDescription()
-                                            ).getText()
-                                        ));
-                                        List<String> formatted = StringUtils.centerStringListTags(lines);
-                                        for (String line : formatted) {
-                                            profile.sendMessage(ComponentEditor.decorateComponent(line));
+
+                                        if (api.getConfigOptions().isUsingPools()) {
+                                            int slot = ch.getSlot();
+                                            Challenge replacement = cl.getRandomChallengeForSlot(slot, new java.util.Random());
+
+                                            if (replacement != null) {
+                                                
+
+                                                // ChallengeProgress newProg = cl.buildNewProgressForQuest(replacement, profile);
+                                                // profile.setProgressForSlot(cl.getName(), slot, newProg);
+
+                                                /* TODO: IMPLEMENT MESSAGE
+                                                List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                        api.getMessage(
+                                                                "challenges.newavailable",
+                                                                "{challenge}", replacement.getDisplayName(),
+                                                                "{challenge-description}", replacement.getDescription()
+                                                        ).getText()
+                                                ));
+                                                List<String> formatted = StringUtils.centerStringListTags(lines);
+                                                for (String line : formatted) {
+                                                    profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                                }
+                                                */
+                                            } else {
+                                                if (ch != null) {
+                                                    List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                        api.getMessage(
+                                                            "challenges.offcooldown",
+                                                            "{challenge}", ch.getDisplayName(),
+                                                            "{challenge-description}", ch.getDescription()
+                                                        ).getText()
+                                                    ));
+                                                    List<String> formatted = StringUtils.centerStringListTags(lines);
+                                                    for (String line : formatted) {
+                                                        profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -142,43 +172,97 @@ public class CobbleChallengeMod implements ModInitializer {
 
                 for (PlayerProfile profile : api.getProfiles()) {
                     if (profile.isOnline()) {
-                        Map<String, List<ChallengeProgress>> expiredChallenges = new HashMap<>();
 
-                        for (ChallengeList challengeList : new ArrayList<>(api.getChallengeLists())) {
-                            String listName = challengeList.getName();
-                            List<ChallengeProgress> cps = new ArrayList<>(profile.getActiveChallengesMap().getOrDefault(listName, Collections.emptyList()));
-
-                            for (ChallengeProgress cp : cps) {
-                                if (cp.hasTimeRanOut()) {
-                                    expiredChallenges.computeIfAbsent(listName, k -> new ArrayList<>()).add(cp);
+                        if (api.getConfigOptions().isUsingPools())
+                        {
+                            class ExpiredSlot 
+                            {
+                                final String listName;
+                                final int slot;
+                                final ChallengeProgress cp;
+                                ExpiredSlot(String listName, int slot, ChallengeProgress cp) {
+                                    this.listName = listName;
+                                    this.slot = slot;
+                                    this.cp = cp;
                                 }
                             }
-                        }
+                            List<ExpiredSlot> expiredSlots = new ArrayList<>();
 
-                        if (!expiredChallenges.isEmpty()) {
-                            tasksToRun.add(() -> {
-                                for (Map.Entry<String, List<ChallengeProgress>> entry : expiredChallenges.entrySet()) {
-                                    List<ChallengeProgress> list = profile.getActiveChallengesMap().get(entry.getKey());
-                                    if (list != null) {
-                                        for (ChallengeProgress cp : entry.getValue()) {
-                                            CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());
-                                            list.remove(cp);
+                            for (ChallengeList cl : new ArrayList<>(api.getChallengeLists())) {
+                                String listName = cl.getName();
+                                Map<Integer, ChallengeProgress> slots = new LinkedHashMap<>(
+                                        profile.getActiveSlotChallengesMap().getOrDefault(listName, Collections.emptyMap())
+                                );
 
-                                            List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                for (Map.Entry<Integer, ChallengeProgress> e : slots.entrySet()) {
+                                    ChallengeProgress cp = e.getValue();
+                                    if (cp != null && cp.hasTimeRanOut()) {
+                                        expiredSlots.add(new ExpiredSlot(listName, e.getKey(), cp));
+                                    }
+                                }
+                            }
+
+                            if (!expiredSlots.isEmpty()) {
+                                tasksToRun.add(() -> {
+                                    for (ExpiredSlot ex : expiredSlots) {
+                                        profile.removeProgressForSlot(ex.listName, ex.slot);
+
+                                        CobbleChallengeMod.logger.info("Resetting expired slot {} challenge {} for player {} in list {}",
+                                                ex.slot, ex.cp.getActiveChallenge().getName(), profile.getUUID(), ex.listName);
+
+                                        List<String> lines = List.of(StringUtils.splitByLineBreak(
                                                 api.getMessage(
-                                                    "challenges.expired",
-                                                    "{challenge}", cp.getActiveChallenge().getDisplayName(),
-                                                    "{challenge-description}", cp.getActiveChallenge().getDescription()
+                                                        "challenges.expired",
+                                                        "{challenge}", ex.cp.getActiveChallenge().getDisplayName(),
+                                                        "{challenge-description}", ex.cp.getActiveChallenge().getDescription()
                                                 ).getText()
-                                            ));
-                                            List<String> formatted = StringUtils.centerStringListTags(lines);
-                                            for (String line : formatted) {
-                                                profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                        ));
+                                        List<String> formatted = StringUtils.centerStringListTags(lines);
+                                        for (String line : formatted) {
+                                            profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                        }
+                                    }
+                                });
+                            }
+                        } else {
+                            Map<String, List<ChallengeProgress>> expiredChallengesLegacy = new HashMap<>();
+
+                            for (ChallengeList challengeList : new ArrayList<>(api.getChallengeLists())) {
+                                String listName = challengeList.getName();
+                                List<ChallengeProgress> cps = new ArrayList<>(profile.getActiveChallengesMap().getOrDefault(listName, Collections.emptyList()));
+
+                                for (ChallengeProgress cp : cps) {
+                                    if (cp.hasTimeRanOut()) {
+                                        expiredChallengesLegacy.computeIfAbsent(listName, k -> new ArrayList<>()).add(cp);
+                                    }
+                                }
+                            }
+
+                            if (!expiredChallengesLegacy.isEmpty()) {
+                                tasksToRun.add(() -> {
+                                    for (Map.Entry<String, List<ChallengeProgress>> entry : expiredChallengesLegacy.entrySet()) {
+                                        List<ChallengeProgress> list = profile.getActiveChallengesMap().get(entry.getKey());
+                                        if (list != null) {
+                                            for (ChallengeProgress cp : entry.getValue()) {
+                                                CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());
+                                                list.remove(cp);
+
+                                                List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                    api.getMessage(
+                                                        "challenges.expired",
+                                                        "{challenge}", cp.getActiveChallenge().getDisplayName(),
+                                                        "{challenge-description}", cp.getActiveChallenge().getDescription()
+                                                    ).getText()
+                                                ));
+                                                List<String> formatted = StringUtils.centerStringListTags(lines);
+                                                for (String line : formatted) {
+                                                    profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
                     }
                 }

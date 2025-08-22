@@ -24,6 +24,8 @@ public class PlayerProfile {
 
     private @Nullable ServerPlayer playerEntity;
     private Map<String, List<ChallengeProgress>> activeChallenges; // active challenges per list
+    private Map<String, Map<Integer, ChallengeProgress>> activeSlotChallenges; // active challenges per list per slot
+    private Map<String, Map<Integer, Challenge>> availableSlotChallenges; // challenges available to do for each slot
     private List<CompletedChallenge> completedChallenges;
     private List<Reward> rewardsToGive;
 
@@ -32,6 +34,8 @@ public class PlayerProfile {
         this.uuid = uuid;
 
         activeChallenges = Collections.synchronizedMap(new HashMap<>());
+        activeSlotChallenges = Collections.synchronizedMap(new LinkedHashMap<>());
+        availableSlotChallenges = Collections.synchronizedMap(new HashMap<>());
         completedChallenges = Collections.synchronizedList(new ArrayList<>());
         rewardsToGive = Collections.synchronizedList(new ArrayList<>());
 
@@ -59,15 +63,30 @@ public class PlayerProfile {
     public Set<ChallengeProgress> getActiveChallenges() {
         Set<ChallengeProgress> set = new HashSet<>();
 
-        for (List<ChallengeProgress> value : activeChallenges.values()) {
-            set.addAll(value);
+        if (api.getConfigOptions().isUsingPools()) {
+            for (Map<Integer, ChallengeProgress> slotMap : activeSlotChallenges.values()) {
+                set.addAll(slotMap.values());
+            }
+        } else {
+            for (List<ChallengeProgress> value : activeChallenges.values()) {
+                set.addAll(value);
+            }
         }
 
         return set;
     }
 
+    public Map<Integer, ChallengeProgress> getActiveSlotChallenges(String listName) {
+        return activeSlotChallenges.computeIfAbsent(listName, k -> new LinkedHashMap<>());
+    }
+
     public Map<String, List<ChallengeProgress>> getActiveChallengesMap() {
         return activeChallenges;
+    }
+
+    public Map<String, Map<Integer, ChallengeProgress>> getActiveSlotChallengesMap()
+    {
+        return activeSlotChallenges;
     }
 
     /**
@@ -76,11 +95,25 @@ public class PlayerProfile {
     public void addUnrestrictedChallenges() {
 
         for (ChallengeList challengeList : new ArrayList<>(api.getChallengeLists())) {
-            for (Challenge challenge : new ArrayList<>(challengeList.getChallengeMap())) {
-                if (!challenge.doesNeedSelection()) {
-                    if (!isChallengeCompleted(challenge.getName())) {
-                        if (!isChallengeInProgress(challenge.getName())) {
-                            addActiveChallenge(challengeList, challenge);
+            if (api.getConfigOptions().isUsingPools()) {
+                for (Map.Entry<Integer, List<Challenge>> slotPool : challengeList.getSlotPools().entrySet()) {
+                    for (Challenge challenge : slotPool.getValue()) {
+                        if (!challenge.doesNeedSelection()) {
+                            if (!isChallengeCompleted(challenge.getName())) {
+                                if (!isChallengeInProgress(challenge.getName())) {
+                                    addActiveChallenge(challengeList, challenge, challenge.getSlot());
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (Challenge challenge : new ArrayList<>(challengeList.getChallengeMap())) {
+                    if (!challenge.doesNeedSelection()) {
+                        if (!isChallengeCompleted(challenge.getName())) {
+                            if (!isChallengeInProgress(challenge.getName())) {
+                                addActiveChallenge(challengeList, challenge, 0);
+                            }
                         }
                     }
                 }
@@ -90,17 +123,40 @@ public class PlayerProfile {
 
     }
 
-    public void addActiveChallenge(ChallengeList list, Challenge challenge) {
-        if (!list.getChallengeMap().contains(challenge)) {
-            throw new RuntimeException(String.format("This challenge '%s' is not contained by this challenge list '%s'.", list.getName(), challenge.getName()));
+    public void addActiveChallenge(ChallengeList list, Challenge challenge, int slot) {
+        if (api.getConfigOptions().isUsingPools()) {
+            if (!list.getChallengesForSlot(slot).contains(challenge)) {
+                throw new RuntimeException(String.format("This challenge '%s' is not contained by this challenge list '%s' on slot '%d'.", list.getName(), challenge.getName(), slot));
+            }
+
+            if (slot <= 0) {
+                throw new RuntimeException("Challenge " + challenge.getName() + " has invalid slot: " + slot);
+            }
+
+            Map<Integer, ChallengeProgress> slots = activeSlotChallenges.computeIfAbsent(list.getName(), k -> new LinkedHashMap<>());
+
+            int max = list.getMaxChallengesPerPlayer();
+            if (slots.size() >= max) {
+                Integer firstKey = slots.keySet().iterator().next();
+                if (firstKey != null) slots.remove(firstKey);
+            }
+
+            ChallengeProgress progress = list.buildNewProgressForQuest(challenge, this);
+            slots.put(slot, progress);
+        } else {
+            if (!list.getChallengeMap().contains(challenge)) {
+                throw new RuntimeException(String.format("This challenge '%s' is not contained by this challenge list '%s'.", list.getName(), challenge.getName()));
+            }
+
+            List<ChallengeProgress> progressInList = this.activeChallenges.computeIfAbsent(list.getName(), (key) -> new ArrayList<>());
+            if (!progressInList.isEmpty() && getChallengesInProgress() >= list.getMaxChallengesPerPlayer())
+                progressInList.removeFirst();
+
+            progressInList.add(list.buildNewProgressForQuest(challenge, this));
         }
-
-        List<ChallengeProgress> progressInList = this.activeChallenges.computeIfAbsent(list.getName(), (key) -> new ArrayList<>());
-        if (!progressInList.isEmpty() && getChallengesInProgress() >= list.getMaxChallengesPerPlayer())
-            progressInList.removeFirst();
-
-        progressInList.add(list.buildNewProgressForQuest(challenge, this));
     }
+
+
 
     private int getChallengesInProgress() {
         int count = 0;
@@ -192,7 +248,19 @@ public class PlayerProfile {
     }
 
     public void removeActiveChallenge(ChallengeProgress challengeProgress) {
-        activeChallenges.get(challengeProgress.getParentList().getName()).remove(challengeProgress);
+        String listName = challengeProgress.getParentList().getName();
+
+        if (api.getConfigOptions().isUsingPools()) {
+            Map<Integer, ChallengeProgress> slots = activeSlotChallenges.get(listName);
+            if (slots != null) {
+                slots.values().removeIf(cp -> cp.equals(challengeProgress));
+            }
+        } else {
+            List<ChallengeProgress> list = activeChallenges.get(listName);
+            if (list != null) {
+                list.remove(challengeProgress);
+            }
+        }
     }
 
     public boolean isChallengeCompleted(String challengeID) {
@@ -277,5 +345,75 @@ public class PlayerProfile {
 
     private void resetProgress() {
         activeChallenges.clear();
+        activeSlotChallenges.clear();
+    }
+
+    public ChallengeProgress getProgressForSlot(String listName, int slot) {
+        return activeSlotChallenges
+                .getOrDefault(listName, Collections.emptyMap())
+                .get(slot);
+    }
+
+    public void setProgressForSlot(String listName, int slot, ChallengeProgress progress) {
+        activeSlotChallenges
+            .computeIfAbsent(listName, k -> new LinkedHashMap<>())
+            .put(slot, progress);
+    }
+
+    public void removeProgressForSlot(String listName, int slot) {
+        Map<Integer, ChallengeProgress> slots = activeSlotChallenges.get(listName);
+        if (slots != null) {
+            slots.remove(slot);
+        }
+    }
+
+    public void setSlotChallenge(String list, int slot, Challenge challenge) {
+        availableSlotChallenges
+            .computeIfAbsent(list, k -> new HashMap<>())
+            .put(slot, challenge);
+    }
+
+    public Map<String, Map<Integer, Challenge>> getAvailableSlotChallenges() {
+        return availableSlotChallenges;
+    }
+
+    public Map<Integer, Challenge> getAvailableSlotChallengesForList(String listName) {
+        return availableSlotChallenges.getOrDefault(listName, Collections.emptyMap());
+    }
+
+    public Challenge getAvailableSlotChallenge(String listName, int slot) {
+        return availableSlotChallenges
+            .computeIfAbsent(listName, k -> new HashMap<>())
+            .get(slot);
+    }
+
+    public void setAvailableSlotChallenge(String listName, int slot, Challenge challenge) {
+        availableSlotChallenges
+            .computeIfAbsent(listName, k -> new HashMap<>())
+            .put(slot, challenge);
+    }
+
+    public void setAvailableChallengesForList(String listName, Map<Integer, Challenge> availableChallenges) {
+        availableSlotChallenges.put(listName, availableChallenges);
+    }
+
+    public void AddDefaultSlotChallenges(PlayerProfile profile)
+    {
+        if (api.getConfigOptions().isUsingPools()) {
+            for (ChallengeList list : api.getChallengeLists()) {
+                String listName = list.getName();
+                for (Map.Entry<Integer, List<Challenge>> slotPool : list.getSlotPools().entrySet()) {
+                    int slot = slotPool.getKey();
+
+                    if (profile.getAvailableSlotChallenge(listName, slot) == null &&
+                        profile.getProgressForSlot(listName, slot) == null) {
+                        List<Challenge> pool = slotPool.getValue();
+                        if (!pool.isEmpty()) {
+                            profile.setAvailableSlotChallenge(listName, slot, pool.getFirst());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

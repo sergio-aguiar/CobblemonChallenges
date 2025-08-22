@@ -30,8 +30,8 @@ public class DefeatBattlerRequirement implements Requirement {
 
     @YamlKey("shiny")
     private boolean shiny = false;
-    @YamlKey("pokemon_type")
-    public String pokemon_type = "any";
+    @YamlKey("type")
+    public String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -156,7 +156,7 @@ public class DefeatBattlerRequirement implements Requirement {
                     continue;
                 }
 
-                if (types.stream().noneMatch(it -> StringUtils.doesStringContainCategory(requirement.pokemon_type.split("/"), it.getName()))) {
+                if (types.stream().noneMatch(it -> StringUtils.doesStringContainCategory(requirement.type.split("/"), it.getName()))) {
                     continue;
                 }
 

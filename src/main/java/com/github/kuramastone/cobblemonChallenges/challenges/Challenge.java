@@ -26,8 +26,10 @@ public class Challenge {
     private long maxTimeInMilliseconds; // how long does the player have to complete this? -1 for infinite time
     private long repeatableEveryMilliseconds = -1; // how often this challenge can be completed. -1 for only once
 
+    private final int slot;
+
     public Challenge(String name, String displayName, List<Reward> rewards, List<Requirement> requirements, ItemConfig displayItem,
-                     boolean needsSelection, long maxTimeInMilliseconds, String description, long repeatableEveryMilliseconds) {
+                     boolean needsSelection, long maxTimeInMilliseconds, String description, long repeatableEveryMilliseconds, int slot) {
         this.name = name;
         this.displayName = displayName;
         this.rewards = rewards;
@@ -37,6 +39,7 @@ public class Challenge {
         this.maxTimeInMilliseconds = maxTimeInMilliseconds;
         this.description = description;
         this.repeatableEveryMilliseconds = repeatableEveryMilliseconds;
+        this.slot = slot;
     }
 
     public static @Nullable Challenge load(String challengeID, YamlConfig section) {
@@ -47,6 +50,7 @@ public class Challenge {
         long repeatableEveryMilliseconds = StringUtils.stringToMilliseconds(section.get("repeatable", "-1"));
         List<Requirement> requirementList = new ArrayList<>();
         List<Reward> rewards = new ArrayList<>();
+        int challengeSlot = section.getInt("challenge-slot");
 
         for (String keyID : section.getKeys("requirements", false)) {
             for (String requirementType : section.getKeys("requirements." + keyID, false)) {
@@ -70,7 +74,7 @@ public class Challenge {
 
         String description = StringUtils.collapseWithNextLines(section.getStringList("description"));
 
-        return new Challenge(challengeID, displayName, rewards, requirementList, displayItem, needsSelection, timeToComplete, description, repeatableEveryMilliseconds);
+        return new Challenge(challengeID, displayName, rewards, requirementList, displayItem, needsSelection, timeToComplete, description, repeatableEveryMilliseconds, challengeSlot);
     }
 
     public long getRepeatableEveryMilliseconds() {
@@ -121,5 +125,13 @@ public class Challenge {
 
     public boolean doesNeedSelection() {
         return needsSelection;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public boolean hasSlot() {
+        return slot > 0;
     }
 }

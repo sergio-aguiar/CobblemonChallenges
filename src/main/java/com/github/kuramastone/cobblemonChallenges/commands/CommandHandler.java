@@ -1,10 +1,14 @@
 package com.github.kuramastone.cobblemonChallenges.commands;
 
+import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
+import com.github.kuramastone.cobblemonChallenges.challenges.requirements.Progression;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeMenuGUI;
+import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.PermissionUtils;
@@ -22,7 +26,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 public class CommandHandler {
 
@@ -46,6 +61,9 @@ public class CommandHandler {
                             .requires(source -> hasPermission(source, "challenges.commands.admin.restart"))
                             .then(Commands.argument("player", EntityArgument.player())
                                     .executes(CommandHandler::handleRestartCommand)))
+                    .then(Commands.literal("migrate")
+                            .requires(source -> hasPermission(source, "challenges.commands.admin.migrate"))
+                            .executes(CommandHandler::handleMigrateLegacyCommand))
             );
         });
 
@@ -94,6 +112,14 @@ public class CommandHandler {
 
             ServerPlayer player = (ServerPlayer) source.getEntity();
 
+            if (api.getConfigOptions().isUsingPools()) {
+                PlayerProfile profile = api.getOrCreateProfile(player.getUUID());
+                if (profile.getActiveSlotChallengesMap() == null || profile.getActiveSlotChallengesMap().isEmpty())
+                {
+                    profile.AddDefaultSlotChallenges(profile);
+                }
+            }
+
             ChallengeMenuGUI gui = new ChallengeMenuGUI(api, api.getOrCreateProfile(player.getUUID()));
             gui.open();
             if (!player.hasContainerOpen())
@@ -132,5 +158,124 @@ public class CommandHandler {
         }
 
         return 0;
+    }
+
+    private static int handleMigrateLegacyCommand(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+
+            if (source.isPlayer()) {
+                source.sendSystemMessage(Component.literal("Players can not use this command.").withStyle(ChatFormatting.RED));
+                return 1;
+            }
+
+            if (!api.getConfigOptions().isUsingPools()) {
+                source.sendSystemMessage(Component.literal("Migration only applies when using slot-based mode.").withStyle(ChatFormatting.RED));
+                return 1;
+            }
+
+            api.loadLegacyProfiles();
+            List<PlayerProfile> profiles = api.getProfiles();
+
+            int migratedCount = 0;
+            for (PlayerProfile profile : profiles) {
+                List<ChallengeList> allLists = new ArrayList<>(api.getChallengeLists());
+
+                for (ChallengeList list : allLists) {
+                    String listName = list.getName();
+
+                    List<ChallengeProgress> legacyProgressList = profile.getActiveChallengesMap().getOrDefault(listName, Collections.emptyList());
+                    Set<Integer> migratedSlots = new HashSet<>();
+
+                    for (ChallengeProgress legacyProgress : legacyProgressList) {
+                        Challenge legacyChallenge = legacyProgress.getActiveChallenge();
+                        if (legacyChallenge == null) continue;
+
+                        for (Map.Entry<Integer, List<Challenge>> slotEntry : list.getSlotPools().entrySet()) {
+                            int slot = slotEntry.getKey();
+                            List<Challenge> pool = slotEntry.getValue();
+
+                            if (migratedSlots.contains(slot)) continue;
+
+                            if (pool.stream().anyMatch(c -> c.getName().equals(legacyChallenge.getName()))) {
+                                Challenge newChallenge = list.getChallenge(legacyChallenge.getName());
+                                if (newChallenge == null) continue;
+
+                                ChallengeProgress newProgress = list.buildNewProgressForQuest(newChallenge, profile);
+
+                                for (Pair<String, Progression<?>> legacyProgPair : legacyProgress.getProgressionMap()) {
+                                    for (Pair<String, Progression<?>> progressPair : newProgress.getProgressionMap()) {
+                                        if (progressPair.getKey().equals(legacyProgPair.getKey())) {
+                                            Progression<?> targetProg = progressPair.getValue();
+                                            if (targetProg != null) {
+                                                copyProgressionData(legacyProgPair.getValue(), targetProg);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                profile.setProgressForSlot(listName, slot, newProgress);
+                                migratedSlots.add(slot);
+                                migratedCount++;
+                                break;
+                            }
+                        }
+                    }
+
+                    Map<Integer, Challenge> available = new LinkedHashMap<>();
+                    for (Map.Entry<Integer, List<Challenge>> slotPool : list.getSlotPools().entrySet()) {
+                        int availableSlot = slotPool.getKey();
+                        List<Challenge> availablePool = slotPool.getValue();
+
+                        Challenge chosen;
+
+                        // Use migrated challenge if present
+                        ChallengeProgress prog = profile.getProgressForSlot(listName, availableSlot);
+                        if (prog != null && prog.getActiveChallenge() != null) {
+                            chosen = prog.getActiveChallenge();
+                        } else {
+                            // Otherwise default to first in pool
+                            chosen = availablePool.isEmpty() ? null : availablePool.get(0);
+                        }
+
+                        if (chosen != null) {
+                            available.put(availableSlot, chosen);
+                        }
+                    }
+
+                    // Store available map in profile
+                    profile.setAvailableChallengesForList(listName, available);
+
+                    // Clear old legacy entries for this list now that we’ve migrated
+                    profile.getActiveChallengesMap().remove(listName);
+                }
+            }
+            api.saveProfiles();
+
+            source.sendSystemMessage(Component.literal("Migrated " + migratedCount + " legacy challenges to slot-based mode.").withStyle(ChatFormatting.GREEN));
+
+            return 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    private static void copyProgressionData(Progression<?> oldProg, Progression<?> newProg) {
+        try {
+            Field[] fields = oldProg.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Object value = field.get(oldProg);
+
+                Field targetField = newProg.getClass().getDeclaredField(field.getName());
+                targetField.setAccessible(true);
+                targetField.set(newProg, value);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

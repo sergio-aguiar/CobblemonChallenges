@@ -1,5 +1,8 @@
 config-version: 1
 
+# Set this value to false to use the old system (explicitly loading every configured challenge); set to true to use the new pool system (pick random challenge on a per-slot basis)
+usePools: false
+
 # These are customizable messages that appear in chat and sometimes inside of guis.
 Messages:
   prefix: "&e&lCobblemon &f&lChallenges &8>>>&r"
@@ -134,7 +137,7 @@ triggers:
     challenge-list: any # This is the challenge list it must come from
   Defeat_Battler: # Win a battle with these conditions
     pokename: any
-    pokemon_type: any/any
+    type: any/any
     amount: 1
     shiny: false
     is_legendary: false

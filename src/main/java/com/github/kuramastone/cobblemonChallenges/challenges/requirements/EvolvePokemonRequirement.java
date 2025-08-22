@@ -24,8 +24,8 @@ public class EvolvePokemonRequirement implements Requirement {
 
     @YamlKey("shiny")
     private boolean shiny = false;
-    @YamlKey("pokemon_type")
-    private String pokemon_type = "any";
+    @YamlKey("type")
+    private String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -105,7 +105,7 @@ public class EvolvePokemonRequirement implements Requirement {
                 return false;
             }
 
-            if (types.stream().noneMatch(it -> StringUtils.doesStringContainCategory(requirement.pokemon_type.split("/"), it.getName()))) {
+            if (types.stream().noneMatch(it -> StringUtils.doesStringContainCategory(requirement.type.split("/"), it.getName()))) {
                 return false;
             }
 

@@ -55,7 +55,7 @@ challenge-list:
         1:
           Defeat_Battler:
             pokename: any
-            pokemon_type: any/any
+            type: any/any
             amount: 1
             shiny: false
             is_legendary: true

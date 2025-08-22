@@ -23,6 +23,8 @@ public class ConfigOptions {
     @YamlObject("challenges.completed-challenge-item")
     private ItemConfig completedChallengeItem;
 
+    private boolean usePools = false;
+
     private GuiConfig menuConfig; // base challenge menu
     private Map<String, GuiConfig> challengeConfigs; // config per challenge
 
@@ -35,6 +37,7 @@ public class ConfigOptions {
                 "config.yml", getClass());
 
         YamlConfig.loadFromYaml(this, config);
+        usePools = config.getBoolean("usePools");
         menuConfig = GuiConfig.load(config.getSection("base-menu"));
         loadMessages(config);
         loadGuiConfigPerChallenge();
@@ -107,5 +110,9 @@ public class ConfigOptions {
 
     public GuiConfig getChallengeGuiConfig(String name) {
         return challengeConfigs.get(name);
+    }
+
+    public boolean isUsingPools() {
+        return usePools;
     }
 }

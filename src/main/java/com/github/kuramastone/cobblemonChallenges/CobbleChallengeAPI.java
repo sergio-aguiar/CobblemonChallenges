@@ -34,7 +34,8 @@ public class CobbleChallengeAPI implements SimpleAPI {
     }
 
     public void loadProfiles() {
-        YamlConfig data = new YamlConfig(CobbleChallengeMod.defaultDataFolder(), "player-data.yml");
+        boolean usePools = getConfigOptions().isUsingPools();
+        YamlConfig data = new YamlConfig(CobbleChallengeMod.defaultDataFolder(), usePools ? "player-data-pools.yml" : "player-data.yml");
 
         for (String strUUID : data.getKeys("", false)) {
             try {
@@ -65,32 +66,109 @@ public class CobbleChallengeAPI implements SimpleAPI {
                     YamlConfig progressionSection = section.getSection("progression");
                     // iterate over each challenge list
                     for (String strList : progressionSection.getKeys("", false)) {
+
                         YamlConfig listSection = progressionSection.getSection(strList);
                         ChallengeList list = getChallengeList(strList);
 
                         if(list != null) {
-                            // iterate over each challenge
-                            for (String strChallenge : listSection.getKeys("", false)) {
-                                Challenge challenge = list.getChallenge(strChallenge);
-                                // removed challenges are no longer loaded, ignore null challenges
-                                if (challenge != null) {
-                                    ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
-                                    YamlConfig challengeSection = listSection.getSection(strChallenge);
+                            if (usePools)
+                            {
+                                // load from slots
+                                if (listSection.containsKey("slots")) {
+                                    YamlConfig slotsSection = listSection.getSection("slots");
+                                    for (String strSlot : slotsSection.getKeys("", false)) {
+                                        if (strSlot.equals("available")) continue;
 
-                                    progress.setStartTime(challengeSection.containsKey("startTime") ?
-                                            challengeSection.getLong("startTime") : System.currentTimeMillis());
+                                        int slot = Integer.parseInt(strSlot);
+                                        YamlConfig slotSection = slotsSection.getSection(strSlot);
+                                        String challengeName = slotSection.getString("challenge");
+                                        Challenge challenge = list.getChallenge(challengeName);
 
-                                    // iterate over each requirement for challenge
-                                    int index = 0;
-                                    for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
-                                        YamlConfig progSection = challengeSection.getSection(index++ + "." + progSet.getKey());
+                                        if (challenge != null) {
+                                            ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
+                                            progress.setStartTime(slotSection.containsKey("startTime") ?
+                                                    slotSection.getLong("startTime") : System.currentTimeMillis());
 
-                                        // if requirements change, this section may be null. ignore it.
-                                        if (progSection != null)
-                                            progSet.getValue().loadFrom(uuid, progSection);
+                                            int index = 0;
+                                            for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
+                                                YamlConfig progSection = slotSection.getSection(index++ + "." + progSet.getKey());
+                                                if (progSection != null) {
+                                                    progSet.getValue().loadFrom(uuid, progSection);
+                                                }
+                                            }
+
+                                            profile.setProgressForSlot(list.getName(), slot, progress);
+                                        }
                                     }
 
-                                    profile.addActiveChallenge(progress);
+                                    if (slotsSection.containsKey("available")) {
+                                        YamlConfig availSection = slotsSection.getSection("available");
+                                        for (String strSlot : availSection.getKeys("", false)) {
+                                            int slot = Integer.parseInt(strSlot);
+                                            String challengeName = availSection.getString(strSlot);
+                                            Challenge challenge = list.getChallenge(challengeName);
+                                            if (challenge != null) {
+                                                profile.setAvailableSlotChallenge(list.getName(), slot, challenge);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                for (Map.Entry<Integer, List<Challenge>> slotPool : list.getSlotPools().entrySet()) {
+                                    int slot = slotPool.getKey();
+
+                                    if (profile.getAvailableSlotChallenge(list.getName(), slot) == null &&
+                                        profile.getProgressForSlot(list.getName(), slot) == null) {
+                                        List<Challenge> pool = slotPool.getValue();
+                                        if (!pool.isEmpty()) {
+                                            profile.setAvailableSlotChallenge(list.getName(), slot, pool.getFirst());
+                                        }
+                                    }
+                                }
+                            } else {
+                                // iterate over each challenge
+                                for (String strChallenge : listSection.getKeys("", false)) {
+                                    Challenge challenge = list.getChallenge(strChallenge);
+                                    // removed challenges are no longer loaded, ignore null challenges
+                                    if (challenge != null) {
+                                        ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
+                                        YamlConfig challengeSection = listSection.getSection(strChallenge);
+
+                                        progress.setStartTime(challengeSection.containsKey("startTime") ?
+                                                challengeSection.getLong("startTime") : System.currentTimeMillis());
+
+                                        // iterate over each requirement for challenge
+                                        int index = 0;
+                                        for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
+                                            YamlConfig progSection = challengeSection.getSection(index++ + "." + progSet.getKey());
+
+                                            // if requirements change, this section may be null. ignore it.
+                                            if (progSection != null)
+                                                progSet.getValue().loadFrom(uuid, progSection);
+                                        }
+
+                                        profile.addActiveChallenge(progress);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    if (usePools) {
+                        for (Map.Entry<String, ChallengeList> listEntry : challengeListMap.entrySet())
+                        {
+                            String listName = listEntry.getKey();
+                            for (Map.Entry<Integer, List<Challenge>> slotPool : listEntry.getValue().getSlotPools().entrySet())
+                            {
+                                int slot = slotPool.getKey();
+
+                                if (profile.getAvailableSlotChallenge(listName, slot) == null &&
+                                    profile.getProgressForSlot(listName, slot) == null) {
+                                    List<Challenge> pool = slotPool.getValue();
+                                    if (!pool.isEmpty()) {
+                                        profile.setAvailableSlotChallenge(listName, slot, pool.getFirst());
+                                    }
                                 }
                             }
                         }
@@ -108,8 +186,78 @@ public class CobbleChallengeAPI implements SimpleAPI {
 
     }
 
-    public synchronized void saveProfiles() {
+    public void loadLegacyProfiles()
+    {
         YamlConfig data = new YamlConfig(CobbleChallengeMod.defaultDataFolder(), "player-data.yml");
+
+        for (String strUUID : data.getKeys("", false)) {
+            try {
+                UUID uuid = UUID.fromString(strUUID);
+                PlayerProfile profile = getOrCreateProfile(uuid, false);
+
+                YamlConfig section = data.getSection(strUUID);
+                // legacy from when they were saved as a list
+                List<CompletedChallenge> completedChallenges = Collections.synchronizedList(new ArrayList<>());
+                profile.setCompletedChallenges(completedChallenges);
+
+                if (section.containsKey("completed-map")) {
+                    YamlConfig completeSection = section.getSection("completed-map");
+
+                    // due to an old bug, it can sometimes be double layered
+                    if (completeSection.containsKey("completed-map")) {
+                        completeSection = completeSection.getSection("completed-map");
+                    }
+
+                    for (String anyID : completeSection.getKeys("", false)) {
+                        String challengeListID = completeSection.getString("%s.challengeListID".formatted(anyID));
+                        String challengeID = completeSection.getString("%s.challengeID".formatted(anyID));
+                        long lastTimeCompleted = completeSection.getLong("%s.timeCompleted".formatted(anyID));
+                        completedChallenges.add(new CompletedChallenge(challengeListID, challengeID, lastTimeCompleted));
+                    }
+                }
+                if (section.containsKey("progression")) {
+                    YamlConfig progressionSection = section.getSection("progression");
+
+                    for (String strList : progressionSection.getKeys("", false)) {
+                        YamlConfig listSection = progressionSection.getSection(strList);
+                        ChallengeList list = getChallengeList(strList);
+
+                        // iterate over each challenge
+                        for (String strChallenge : listSection.getKeys("", false)) {
+                            Challenge challenge = list.getChallenge(strChallenge);
+                            // removed challenges are no longer loaded, ignore null challenges
+                            if (challenge != null) {
+                                ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
+                                YamlConfig challengeSection = listSection.getSection(strChallenge);
+
+                                progress.setStartTime(challengeSection.containsKey("startTime") ?
+                                        challengeSection.getLong("startTime") : System.currentTimeMillis());
+
+                                // iterate over each requirement for challenge
+                                int index = 0;
+                                for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
+                                    YamlConfig progSection = challengeSection.getSection(index++ + "." + progSet.getKey());
+
+                                    // if requirements change, this section may be null. ignore it.
+                                    if (progSection != null)
+                                        progSet.getValue().loadFrom(uuid, progSection);
+                                }
+
+                                profile.addActiveChallenge(progress);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                CobbleChallengeMod.logger.error("Failed to load cobblemonchallenges player profile: {}", strUUID);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void saveProfiles() {
+        boolean usePools = getConfigOptions().isUsingPools();
+        YamlConfig data = new YamlConfig(CobbleChallengeMod.defaultDataFolder(), usePools ? "player-data-pools.yml" : "player-data.yml");
         data.clear();
 
         for (PlayerProfile profile : getProfiles()) {
@@ -124,17 +272,58 @@ public class CobbleChallengeAPI implements SimpleAPI {
                     completedSection.set("%s.timeCompleted".formatted(challengeID), completedChallenge.timeCompleted());
                 }
 
-                for (Map.Entry<String, List<ChallengeProgress>> set : profile.getActiveChallengesMap().entrySet()) {
-                    for (ChallengeProgress cp : set.getValue()) {
-                        YamlConfig challengeSection = profileEntry.getOrCreateSection(
-                                "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
-                        challengeSection.set("startTime", cp.getStartTime());
-                        int index = 0;
-                        for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
-                            YamlConfig progSection = challengeSection.getOrCreateSection(
-                                    "%s.%s"
-                                            .formatted(index++, progSet.getKey()));
-                            progSet.getValue().writeTo(progSection);
+                if (usePools) {
+                    // save slot-based challenges
+
+                    Set<String> allListIDs = new HashSet<>();
+                    allListIDs.addAll(profile.getActiveSlotChallengesMap().keySet());
+                    allListIDs.addAll(profile.getAvailableSlotChallenges().keySet());
+
+                    for (String listID : allListIDs) {
+                        YamlConfig slotsSection = profileEntry.getOrCreateSection("progression.%s.slots".formatted(listID));
+
+                        Map<Integer, ChallengeProgress> activeSlots = profile.getActiveSlotChallenges(listID);
+                        if (activeSlots != null) {
+                            for (Map.Entry<Integer, ChallengeProgress> slotEntry : activeSlots.entrySet()) {
+                                int slot = slotEntry.getKey();
+                                ChallengeProgress cp = slotEntry.getValue();
+                                YamlConfig slotSection = slotsSection.getOrCreateSection(String.valueOf(slot));
+
+                                if (cp != null && cp.getActiveChallenge() != null) {
+                                    slotSection.set("challenge", cp.getActiveChallenge().getName());
+                                    slotSection.set("startTime", cp.getStartTime());
+
+                                    int index = 0;
+                                    for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
+                                        YamlConfig progSection = slotSection.getOrCreateSection(index++ + "." + progSet.getKey());
+                                        progSet.getValue().writeTo(progSection);
+                                    }
+                                }
+                            }
+                        }
+                    
+                        Map<Integer, Challenge> available = profile.getAvailableSlotChallengesForList(listID);
+                        if (available != null && !available.isEmpty())
+                        {
+                            YamlConfig availSection = slotsSection.getOrCreateSection("available");
+                            for (Map.Entry<Integer, Challenge> availEntry : available.entrySet()) {
+                                availSection.set(String.valueOf(availEntry.getKey()), availEntry.getValue().getName());
+                            }
+                        }
+                    }
+                } else {
+                    for (Map.Entry<String, List<ChallengeProgress>> set : profile.getActiveChallengesMap().entrySet()) {
+                        for (ChallengeProgress cp : set.getValue()) {
+                            YamlConfig challengeSection = profileEntry.getOrCreateSection(
+                                    "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
+                            challengeSection.set("startTime", cp.getStartTime());
+                            int index = 0;
+                            for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
+                                YamlConfig progSection = challengeSection.getOrCreateSection(
+                                        "%s.%s"
+                                                .formatted(index++, progSet.getKey()));
+                                progSet.getValue().writeTo(progSection);
+                            }
                         }
                     }
                 }
@@ -184,7 +373,7 @@ public class CobbleChallengeAPI implements SimpleAPI {
 
             ChallengeList cl = ChallengeList.load(this, name, config.getSection("challenge-list"));
             challengeListMap.put(name, cl);
-            CobbleChallengeMod.logger.info("Loading {} config with {} challenges...", name, cl.getChallengeMap().size());
+            CobbleChallengeMod.logger.info("Loading %s config with %d challenge%s".formatted(name, (getConfigOptions().isUsingPools()) ? cl.getSlotPools().size() : cl.getChallengeMap().size(), ((getConfigOptions().isUsingPools()) ? " slots..." : "s...")));
         }
     }
 
@@ -192,12 +381,17 @@ public class CobbleChallengeAPI implements SimpleAPI {
      * @param challenge
      * @return Returns false if a challenge is already registered under that name
      */
-    public boolean registerChallenge(Challenge challenge) {
+    public boolean registerChallenge(Challenge challenge, String listName, int slot)
+    {
         if (this.allChallengesByName.containsKey(challenge.getName())) {
             return false;
         }
 
-        this.allChallengesByName.put(challenge.getName(), challenge);
+        if (configOptions.isUsingPools() && slot <= 0) {
+            return false;
+        }
+
+        allChallengesByName.put(challenge.getName(), challenge);
         return true;
     }
 

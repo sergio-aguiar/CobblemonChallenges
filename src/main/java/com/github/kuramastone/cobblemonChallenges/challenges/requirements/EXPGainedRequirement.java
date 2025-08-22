@@ -25,8 +25,8 @@ public class EXPGainedRequirement implements Requirement {
 
     @YamlKey("shiny") 
     private boolean shiny = false;
-    @YamlKey("pokemon_type")
-    private String pokemon_type = "any";
+    @YamlKey("type")
+    private String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -110,8 +110,8 @@ public class EXPGainedRequirement implements Requirement {
                 return false;
             }
 
-            if (!requirement.pokemon_type.toLowerCase().startsWith("any") &&
-                    types.stream().map(ElementalType::toString).noneMatch(requirement.pokemon_type::equalsIgnoreCase)) {
+            if (!requirement.type.toLowerCase().startsWith("any") &&
+                    types.stream().map(ElementalType::getName).noneMatch(requirement.type::equalsIgnoreCase)) {
                 return false;
             }
 

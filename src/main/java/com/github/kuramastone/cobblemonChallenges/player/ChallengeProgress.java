@@ -134,8 +134,8 @@ public class ChallengeProgress {
             else if (set.getValue() instanceof DefeatBattlerRequirement.DefeatPokemonProgression prog) {
                 pokename = prog.requirement.pokename;
 
-                if(!prog.requirement.pokemon_type.equalsIgnoreCase("any")) {
-                    battlerData = prog.requirement.pokemon_type;
+                if(!prog.requirement.type.equalsIgnoreCase("any")) {
+                    battlerData = prog.requirement.type;
                     battlerData = Character.toUpperCase(battlerData.charAt(0)) + battlerData.substring(1);
                 }
             }

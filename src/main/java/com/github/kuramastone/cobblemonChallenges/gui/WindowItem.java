@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.guis.ChallengeItem;
 import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
 import com.mojang.brigadier.StringReader;
 import net.minecraft.server.MinecraftServer;
@@ -27,9 +28,15 @@ public class WindowItem {
     private TickScheduler.ForgeTask task; // used if the item has a scheduled update
     private Callable<Boolean> lastCondition;
 
+    private int slot;
+
     public WindowItem(@Nullable SimpleWindow window, ItemProvider builder) {
         this.window = window;
         this.builder = builder;
+
+        if (builder instanceof ChallengeItem challengeItem) {
+            slot = challengeItem.getChallenge().getSlot();
+        }
     }
 
     public WindowItem(@Nullable SimpleWindow window, ItemProvider builder, Runnable runnableOnClick, List<String> commands, int pagesToTurn) {
@@ -38,6 +45,10 @@ public class WindowItem {
         this.runnableOnClick = runnableOnClick;
         this.commands = commands;
         this.pagesToTurn = pagesToTurn;
+    }
+
+    public int getChallengeSlot() {
+        return slot;
     }
 
     public void setWindow(SimpleWindow window) {
@@ -50,6 +61,10 @@ public class WindowItem {
 
     public ItemProvider getBuilder() {
         return builder;
+    }
+
+    public void setBuilder(ItemProvider builder) {
+        this.builder = builder;
     }
 
     public ItemStack handleClick(ClickType type, int dragType, Player player) {

@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.guis;
 
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
+import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.MilestoneTimePlayedRequirement;
@@ -86,6 +87,14 @@ public class ChallengeListGUI {
 
     public void open() {
         window.show(profile.getPlayerEntity());
+    }
+
+    public void refreshChallengeAtSlot(int slot, Challenge challenge) {
+        if (window == null) return;
+
+        CobbleChallengeMod.logger.info("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
+        profile.sendMessage("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
+        window.refreshChallengeAtSlot(slot, new ChallengeItem(window, profile, challenge));
     }
 }
 

@@ -53,7 +53,7 @@ public class ChallengeMenuGUI {
 
             String listName = linkedTo.getName();
             if (!profile.containsWindowGUIForList(listName)) {
-                profile.setWindowGUI(listName, new ChallengeListGUI(api, profile, linkedTo, api.getConfigOptions().getChallengeGuiConfig(linkedTo.getName())));
+                profile.setWindowGUI(listName, new ChallengeListGUI(api, profile, linkedTo, api.getConfigOptions().getChallengeGuiConfig(listName)));
             }
             profile.openWindowGUIForList(listName);
         };

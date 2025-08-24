@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.bUtilities.ComponentEditor;
+import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,6 +69,18 @@ public class SimpleWindow {
 
         player.openMenu(new CustomProvider(name, rows, container));
         this.menu = (CustomMenu) player.containerMenu;
+    }
+
+    public void refreshChallengeAtSlot(int contentIndex, ItemProvider builder) {
+        if (itemPerSlot == null) return;
+        if (contentIndex <= 0 || contentIndex > contentSlots.size()) return;
+
+        int realSlot = contentSlots.get(contentIndex - 1).slotID;
+        WindowItem windowItem = itemPerSlot.get(realSlot);
+        if (windowItem != null) {
+            windowItem.setBuilder(builder);
+            updateSlot(windowItem);
+        }
     }
 
     private static MenuType<?> getMenuTypeForRows(int rows) {

@@ -408,6 +408,11 @@ public class PlayerProfile {
         availableSlotChallenges
             .computeIfAbsent(listName, k -> new HashMap<>())
             .put(slot, challenge);
+
+        if (windowGUIMap == null) return;
+        ChallengeListGUI challengeListGUI = windowGUIMap.get(listName);
+        if (challengeListGUI == null) return;
+        challengeListGUI.refreshChallengeAtSlot(slot, challenge);
     }
 
     public void setAvailableChallengesForList(String listName, Map<Integer, Challenge> availableChallenges) {

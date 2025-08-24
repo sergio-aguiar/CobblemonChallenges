@@ -30,6 +30,10 @@ public class ChallengeItem implements ItemProvider {
         api = CobbleChallengeMod.instance.getAPI();
     }
 
+    public Challenge getChallenge() {
+        return challenge;
+    }
+
     @Override
     public ItemStack build() {
 

@@ -94,7 +94,13 @@ public class ChallengeListGUI {
 
         CobbleChallengeMod.logger.info("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
         profile.sendMessage("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
-        window.refreshChallengeAtSlot(slot, new ChallengeItem(window, profile, challenge));
+        
+        WindowItem windowItem = window.getItemAtContentSlot(slot);
+        if (windowItem != null) {
+            windowItem.setBuilder(new ChallengeItem(window, profile, challenge));
+            windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
+            window.updateSlot(windowItem);
+        }
     }
 }
 

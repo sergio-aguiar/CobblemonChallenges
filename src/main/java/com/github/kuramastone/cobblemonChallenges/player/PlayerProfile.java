@@ -7,6 +7,7 @@ import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.reward.Reward;
+import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import net.kyori.adventure.text.Component;
@@ -26,6 +27,7 @@ public class PlayerProfile {
     private Map<String, List<ChallengeProgress>> activeChallenges; // active challenges per list
     private Map<String, Map<Integer, ChallengeProgress>> activeSlotChallenges; // active challenges per list per slot
     private Map<String, Map<Integer, Challenge>> availableSlotChallenges; // challenges available to do for each slot
+    private Map<String, ChallengeListGUI> windowGUIMap;
     private List<CompletedChallenge> completedChallenges;
     private List<Reward> rewardsToGive;
 
@@ -36,11 +38,26 @@ public class PlayerProfile {
         activeChallenges = Collections.synchronizedMap(new HashMap<>());
         activeSlotChallenges = Collections.synchronizedMap(new LinkedHashMap<>());
         availableSlotChallenges = Collections.synchronizedMap(new HashMap<>());
+        windowGUIMap = Collections.synchronizedMap(new HashMap<>());
         completedChallenges = Collections.synchronizedList(new ArrayList<>());
         rewardsToGive = Collections.synchronizedList(new ArrayList<>());
 
         server = CobbleChallengeMod.getMinecraftServer();
         syncPlayer(); // try syncing player object
+    }
+
+    public void setWindowGUI(String listName, ChallengeListGUI gui) {
+        if (listName == null || gui == null) return;
+        windowGUIMap.put(listName, gui);
+    }
+
+    public void openWindowGUIForList(String listName) {
+        ChallengeListGUI gui = windowGUIMap.get(listName);
+        if (gui != null) gui.open();
+    }
+    
+    public boolean containsWindowGUIForList(String listName) { 
+        return windowGUIMap.containsKey(listName); 
     }
 
     public boolean isOnline() {

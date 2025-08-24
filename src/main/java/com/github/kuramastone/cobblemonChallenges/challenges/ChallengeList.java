@@ -51,7 +51,7 @@ public class ChallengeList {
 
                 if (slot > 0) {
                     slotPool.computeIfAbsent(slot, k -> new ArrayList<>()).add(challenge);
-                    CobbleChallengeMod.logger.info("Challenge {} with slot {} has been added to list {}.", challengeID, slot, challengeListID);
+                    // CobbleChallengeMod.logger.info("Challenge {} with slot {} has been added to list {}.", challengeID, slot, challengeListID);
                 } else {
                     CobbleChallengeMod.logger.warn("Challenge {} is missing a valid slot number in pool mode. Skipping.", challengeID);
                 }

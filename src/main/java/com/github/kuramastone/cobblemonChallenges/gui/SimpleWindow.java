@@ -61,10 +61,13 @@ public class SimpleWindow {
         playersShown.add(player);
         this.gui = container;
         buildInventory();
+
+        for (WindowItem windowItem : itemPerSlot.values()) {
+            windowItem.restartAutoUpdate(15);
+        }
+
         player.openMenu(new CustomProvider(name, rows, container));
         this.menu = (CustomMenu) player.containerMenu;
-
-
     }
 
     private static MenuType<?> getMenuTypeForRows(int rows) {

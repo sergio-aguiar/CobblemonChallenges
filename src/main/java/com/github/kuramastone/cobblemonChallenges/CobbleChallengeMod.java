@@ -108,15 +108,11 @@ public class CobbleChallengeMod implements ModInitializer {
                                             Challenge replacement = cl.getRandomChallengeForSlot(slot, new java.util.Random());
 
                                             if (replacement != null) {
-                                                
+                                                profile.setAvailableSlotChallenge(cl.getName(), slot, replacement);
 
-                                                // ChallengeProgress newProg = cl.buildNewProgressForQuest(replacement, profile);
-                                                // profile.setProgressForSlot(cl.getName(), slot, newProg);
-
-                                                /* TODO: IMPLEMENT MESSAGE
                                                 List<String> lines = List.of(StringUtils.splitByLineBreak(
                                                         api.getMessage(
-                                                                "challenges.newavailable",
+                                                                "challenges.randomized",
                                                                 "{challenge}", replacement.getDisplayName(),
                                                                 "{challenge-description}", replacement.getDescription()
                                                         ).getText()
@@ -125,7 +121,6 @@ public class CobbleChallengeMod implements ModInitializer {
                                                 for (String line : formatted) {
                                                     profile.sendMessage(ComponentEditor.decorateComponent(line));
                                                 }
-                                                */
                                             } else {
                                                 if (ch != null) {
                                                     List<String> lines = List.of(StringUtils.splitByLineBreak(

@@ -1,6 +1,5 @@
 package com.github.kuramastone.cobblemonChallenges.commands;
 
-import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
@@ -29,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -151,7 +149,12 @@ public class CommandHandler {
                 return 1;
             }
 
-            new ChallengeListGUI(api, api.getOrCreateProfile(player.getUUID()), challengeList, api.getConfigOptions().getChallengeGuiConfig(challengeList.getName())).open();
+            PlayerProfile profile = api.getOrCreateProfile(player.getUUID());
+            if (!profile.containsWindowGUIForList(listName)) {
+                profile.setWindowGUI(listName, new ChallengeListGUI(api, profile, challengeList, api.getConfigOptions().getChallengeGuiConfig(challengeList.getName())));
+            }
+            profile.openWindowGUIForList(listName);
+            
             return 1;
         } catch (Exception e) {
             e.printStackTrace();

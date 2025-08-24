@@ -25,6 +25,7 @@ public class WindowItem {
     private int pagesToTurn = 0; // pages to turn on click
 
     private TickScheduler.ForgeTask task; // used if the item has a scheduled update
+    private Callable<Boolean> lastCondition;
 
     public WindowItem(@Nullable SimpleWindow window, ItemProvider builder) {
         this.window = window;
@@ -117,6 +118,8 @@ public class WindowItem {
      * @param condition The item will only update if this returns true
      */
     public void setAutoUpdate(int i, Callable<Boolean> condition) {
+        lastCondition = condition;
+
         final long timeoutBegin = System.currentTimeMillis();
 
         // cancel old task if possible
@@ -126,6 +129,34 @@ public class WindowItem {
 
         task = TickScheduler.scheduleRepeating(i, () -> {
             if (condition.call())
+                notifyWindow();
+
+            // after 5 minutes, it will stop updating even if it has viewers. this is a safety to prevent it from continuing forever if something goes wrong
+            if (timeoutBegin + 1000 * 60 * 5 < System.currentTimeMillis()) {
+                return false;
+            }
+
+            // wait for window assignment
+            if (window == null)
+                return true;
+
+            // stop repeating if nobody is viewing
+            return window.isAnyoneViewing();
+        });
+    }
+
+    public void restartAutoUpdate(int i)
+    {
+        if (lastCondition == null) return;
+
+        final long timeoutBegin = System.currentTimeMillis();
+
+        if (task != null) {
+            task.setCancelled(true);
+        }
+
+        task = TickScheduler.scheduleRepeating(i, () -> {
+            if (lastCondition.call())
                 notifyWindow();
 
             // after 5 minutes, it will stop updating even if it has viewers. this is a safety to prevent it from continuing forever if something goes wrong

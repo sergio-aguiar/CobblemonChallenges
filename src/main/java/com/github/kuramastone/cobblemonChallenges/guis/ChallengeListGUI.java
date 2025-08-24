@@ -44,6 +44,7 @@ public class ChallengeListGUI {
                 if (challenge == null || slot <= 0) continue;
 
                 WindowItem item = new WindowItem(window, new ChallengeItem(window, profile, challenge));
+                item.setRunnableOnClick(onChallengeClick(challenge, item, slot));
 
                 if (challenge.doesNeedSelection() && profile.isChallengeInProgress(challenge.getName())) {
                     item.setAutoUpdate(15, () ->
@@ -51,7 +52,6 @@ public class ChallengeListGUI {
                                     || profile.isChallengeInProgress(challenge.getName()));
                 }
 
-                item.setRunnableOnClick(onChallengeClick(challenge, item, slot));
                 contents.add(item);
             }
         } else {

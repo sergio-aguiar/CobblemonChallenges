@@ -50,7 +50,12 @@ public class ChallengeMenuGUI {
     private Runnable onChallengeItemClick(ChallengeList linkedTo) {
         return () -> {
             //PixelChallengeMod.logger.warn(String.format("Opening challenges for list %s", linkedTo.getName()));
-            new ChallengeListGUI(api, profile, linkedTo, api.getConfigOptions().getChallengeGuiConfig(linkedTo.getName())).open();
+
+            String listName = linkedTo.getName();
+            if (!profile.containsWindowGUIForList(listName)) {
+                profile.setWindowGUI(listName, new ChallengeListGUI(api, profile, linkedTo, api.getConfigOptions().getChallengeGuiConfig(linkedTo.getName())));
+            }
+            profile.openWindowGUIForList(listName);
         };
     }
 

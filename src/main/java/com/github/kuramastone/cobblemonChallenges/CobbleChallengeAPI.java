@@ -409,8 +409,10 @@ public class CobbleChallengeAPI implements SimpleAPI {
 
     public PlayerProfile getOrCreateProfile(UUID uuid, boolean addChallenges) {
         PlayerProfile pp = profileMap.computeIfAbsent(uuid, id -> new PlayerProfile(this, id));
-        if (addChallenges)
+        if (addChallenges) {
+            pp.AddDefaultSlotChallenges(pp);
             pp.addUnrestrictedChallenges(); // add challenges that dont require selection
+        }
         return pp;
     }
 

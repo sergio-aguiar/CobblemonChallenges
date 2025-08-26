@@ -175,19 +175,18 @@ public class CobbleChallengeAPI implements SimpleAPI {
                     }
                 }
 
+                profile.AddDefaultSlotChallenges();
+                profile.resetMissingChallenges();
                 // only add unrestricted challenges after adding saved challenges
                 profile.addUnrestrictedChallenges();
             } catch (Exception e) {
                 CobbleChallengeMod.logger.error("Failed to load cobblemonchallenges player profile: {}", strUUID);
                 e.printStackTrace();
             }
-
         }
-
     }
 
-    public void loadLegacyProfiles()
-    {
+    public void loadLegacyProfiles() {
         YamlConfig data = new YamlConfig(CobbleChallengeMod.defaultDataFolder(), "player-data.yml");
 
         for (String strUUID : data.getKeys("", false)) {
@@ -408,9 +407,13 @@ public class CobbleChallengeAPI implements SimpleAPI {
     }
 
     public PlayerProfile getOrCreateProfile(UUID uuid, boolean addChallenges) {
+        Boolean profileExists = profileMap.containsKey(uuid);
+
         PlayerProfile pp = profileMap.computeIfAbsent(uuid, id -> new PlayerProfile(this, id));
-        if (addChallenges) {
-            pp.AddDefaultSlotChallenges(pp);
+
+        if (addChallenges && !profileExists) {
+            pp.AddDefaultSlotChallenges();
+            pp.resetMissingChallenges();
             pp.addUnrestrictedChallenges(); // add challenges that dont require selection
         }
         return pp;

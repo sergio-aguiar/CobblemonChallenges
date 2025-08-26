@@ -78,6 +78,10 @@ public class SimpleWindow {
         return itemPerSlot.get(realSlot);
     }
 
+    public Map<Integer, WindowItem> getItemsPerSlot() {
+        return itemPerSlot != null ? itemPerSlot : Collections.emptyMap();
+    }
+
     private static MenuType<?> getMenuTypeForRows(int rows) {
         return switch (rows) {
             case 1 -> MenuType.GENERIC_9x1;

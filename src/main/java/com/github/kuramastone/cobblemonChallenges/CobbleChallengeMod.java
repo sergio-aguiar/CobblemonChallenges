@@ -102,7 +102,6 @@ public class CobbleChallengeMod implements ModInitializer {
                                     ChallengeList cl = api.getChallengeList(cc.challengeListID());
                                     Challenge ch = cl != null ? cl.getChallenge(cc.challengeID()) : null;
                                     if (ch != null) {
-
                                         if (api.getConfigOptions().isUsingPools()) {
                                             int slot = ch.getSlot();
                                             Challenge replacement = cl.getRandomChallengeForSlot(slot, new java.util.Random());
@@ -122,19 +121,33 @@ public class CobbleChallengeMod implements ModInitializer {
                                                     profile.sendMessage(ComponentEditor.decorateComponent(line));
                                                 }
                                             } else {
-                                                if (ch != null) {
-                                                    List<String> lines = List.of(StringUtils.splitByLineBreak(
-                                                        api.getMessage(
-                                                            "challenges.offcooldown",
-                                                            "{challenge}", ch.getDisplayName(),
-                                                            "{challenge-description}", ch.getDescription()
-                                                        ).getText()
-                                                    ));
-                                                    List<String> formatted = StringUtils.centerStringListTags(lines);
-                                                    for (String line : formatted) {
-                                                        profile.sendMessage(ComponentEditor.decorateComponent(line));
-                                                    }
+                                                List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                    api.getMessage(
+                                                        "challenges.offcooldown",
+                                                        "{challenge}", ch.getDisplayName(),
+                                                        "{challenge-description}", ch.getDescription()
+                                                    ).getText()
+                                                ));
+                                                List<String> formatted = StringUtils.centerStringListTags(lines);
+                                                for (String line : formatted) {
+                                                    profile.sendMessage(ComponentEditor.decorateComponent(line));
                                                 }
+                                            }
+                                        } else {
+                                            if (!ch.doesNeedSelection()) {
+                                                profile.addActiveChallenge(cl.buildNewProgressForQuest(ch, profile));
+                                            }
+
+                                            List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                                api.getMessage(
+                                                    "challenges.offcooldown",
+                                                    "{challenge}", ch.getDisplayName(),
+                                                    "{challenge-description}", ch.getDescription()
+                                                ).getText()
+                                            ));
+                                            List<String> formatted = StringUtils.centerStringListTags(lines);
+                                            for (String line : formatted) {
+                                                profile.sendMessage(ComponentEditor.decorateComponent(line));
                                             }
                                         }
                                     }

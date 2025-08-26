@@ -42,15 +42,16 @@ public class Challenge {
         this.slot = slot;
     }
 
-    public static @Nullable Challenge load(String challengeID, YamlConfig section) {
+    public static @Nullable Challenge load(String challengeID, YamlConfig section, boolean isUsingPools) {
         String displayName = section.get("display-name", challengeID);
         boolean needsSelection = section.get("needs-selection", false);
         long timeToComplete = StringUtils.stringToMilliseconds(section.get("time-limit", "-1"));
         ItemConfig displayItem = new ItemConfig(section.getSection("display-item"));
         long repeatableEveryMilliseconds = StringUtils.stringToMilliseconds(section.get("repeatable", "-1"));
+        repeatableEveryMilliseconds = isUsingPools ? (repeatableEveryMilliseconds > 0 ? repeatableEveryMilliseconds : 1000) : repeatableEveryMilliseconds;
         List<Requirement> requirementList = new ArrayList<>();
         List<Reward> rewards = new ArrayList<>();
-        int challengeSlot = section.getInt("challenge-slot");
+        int challengeSlot = section.hasKey("challenge-slot") ? section.getInt("challenge-slot") : -1;
 
         for (String keyID : section.getKeys("requirements", false)) {
             for (String requirementType : section.getKeys("requirements." + keyID, false)) {

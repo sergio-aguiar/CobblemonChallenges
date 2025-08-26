@@ -69,10 +69,10 @@ public class CommandHandler {
 
     private static int handleRestartCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Player player = EntityArgument.getPlayer(context, "player");
-        PlayerProfile profile = CobbleChallengeMod.instance.getAPI().getOrCreateProfile(player.getUUID());
+        PlayerProfile profile = CobbleChallengeMod.instance.getAPI().getOrCreateProfile(player.getUUID(), false);
 
+        profile.resetMissingChallenges();
         profile.resetChallenges();
-        profile.addUnrestrictedChallenges();
 
         context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.restart")));
         return 1;
@@ -95,6 +95,14 @@ public class CommandHandler {
 
     private static int handleReloadCommand(CommandContext<CommandSourceStack> context) {
         api.reloadConfig();
+
+        for (PlayerProfile profile : api.getProfiles()) {
+            if (profile.isOnline()) {
+                profile.resetMissingChallenges();
+                profile.AddDefaultSlotChallenges();
+            }
+        }
+
         context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.reload")));
         return 1;
     }
@@ -111,14 +119,14 @@ public class CommandHandler {
             ServerPlayer player = (ServerPlayer) source.getEntity();
 
             if (api.getConfigOptions().isUsingPools()) {
-                PlayerProfile profile = api.getOrCreateProfile(player.getUUID());
-                if (profile.getActiveSlotChallengesMap() == null || profile.getActiveSlotChallengesMap().isEmpty())
+                PlayerProfile profile = api.getOrCreateProfile(player.getUUID(), false);
+                if (profile.getAvailableSlotChallenges() == null || profile.getAvailableSlotChallenges().isEmpty())
                 {
-                    profile.AddDefaultSlotChallenges(profile);
+                    profile.AddDefaultSlotChallenges();
                 }
             }
 
-            ChallengeMenuGUI gui = new ChallengeMenuGUI(api, api.getOrCreateProfile(player.getUUID()));
+            ChallengeMenuGUI gui = new ChallengeMenuGUI(api, api.getOrCreateProfile(player.getUUID(), false));
             gui.open();
             if (!player.hasContainerOpen())
                 player.displayClientMessage(FabricAdapter.adapt(api.getMessage("commands.opening-base-gui")), false);
@@ -149,7 +157,7 @@ public class CommandHandler {
                 return 1;
             }
 
-            PlayerProfile profile = api.getOrCreateProfile(player.getUUID());
+            PlayerProfile profile = api.getOrCreateProfile(player.getUUID(), false);
             if (!profile.containsWindowGUIForList(listName)) {
                 profile.setWindowGUI(listName, new ChallengeListGUI(api, profile, challengeList, api.getConfigOptions().getChallengeGuiConfig(challengeList.getName())));
             }
@@ -258,6 +266,15 @@ public class CommandHandler {
 
             source.sendSystemMessage(Component.literal("Migrated " + migratedCount + " legacy challenges to slot-based mode.").withStyle(ChatFormatting.GREEN));
 
+            api.reloadConfig();
+            for (PlayerProfile profile : api.getProfiles()) {
+                if (profile.isOnline()) {
+                    profile.resetMissingChallenges();
+                    profile.AddDefaultSlotChallenges();
+                }
+            }
+
+            context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.migrate")));
             return 1;
         } catch (Exception e) {
             e.printStackTrace();

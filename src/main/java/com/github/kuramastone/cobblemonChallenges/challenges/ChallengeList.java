@@ -37,7 +37,7 @@ public class ChallengeList {
         boolean usePools = api.getConfigOptions().isUsingPools();
 
         for (String challengeID : section.getKeys("challenges", false)) {
-            Challenge challenge = Challenge.load(challengeID, section.getSection("challenges." + challengeID));
+            Challenge challenge = Challenge.load(challengeID, section.getSection("challenges." + challengeID), usePools);
             if(challenge == null) continue; // something went wrong, skip
 
             if (usePools) {
@@ -65,7 +65,7 @@ public class ChallengeList {
                 challengeList.add(challenge);
             }
         }
-        int maxChallengesPerPlayer = section.get("maxChallengesPerPlayer", 1);
+        int maxChallengesPerPlayer = section.get("max-challenges-per-player", 1);
 
         return new ChallengeList(api, challengeListID, challengeList, slotPool, maxChallengesPerPlayer);
     }

@@ -28,7 +28,7 @@ public class ChallengeListener {
 
     public static void passEvent(Object event, UUID player) {
 
-        PlayerProfile profile = api.getOrCreateProfile(player);
+        PlayerProfile profile = api.getOrCreateProfile(player, false);
         for (ChallengeProgress activeChallenge : profile.getActiveChallenges()) {
             activeChallenge.progress(event);
         }

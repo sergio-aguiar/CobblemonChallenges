@@ -92,14 +92,27 @@ public class ChallengeListGUI {
     public void refreshChallengeAtSlot(int slot, Challenge challenge) {
         if (window == null) return;
 
-        CobbleChallengeMod.logger.info("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
-        profile.sendMessage("Updating slot %d for list %s with challenge %s".formatted(slot, challengeList.getName(), challenge.getName()));
-        
         WindowItem windowItem = window.getItemAtContentSlot(slot);
         if (windowItem != null) {
             windowItem.setBuilder(new ChallengeItem(window, profile, challenge));
             windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
             window.updateSlot(windowItem);
+        }
+    }
+
+    public void refreshChallenge(Challenge challenge, int challengeSlot) {
+        if (window == null) return;
+
+        for (Map.Entry<Integer, WindowItem> entry : window.getItemsPerSlot().entrySet()) {
+            int slot = entry.getKey();
+            WindowItem windowItem = entry.getValue();
+
+            if (windowItem != null && slot == challengeSlot) {
+                windowItem.setBuilder(new ChallengeItem(window, profile, challenge));
+                windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
+                window.updateSlot(windowItem);
+                break;
+            }
         }
     }
 }

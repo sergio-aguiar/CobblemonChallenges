@@ -6,6 +6,7 @@ import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.MilestoneTimePlayedRequirement;
 import com.github.kuramastone.cobblemonChallenges.gui.GuiConfig;
+import com.github.kuramastone.cobblemonChallenges.gui.ItemProvider;
 import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
 
@@ -19,7 +20,8 @@ public class ChallengeListGUI {
 
     private final CobbleChallengeAPI api;
     private final PlayerProfile profile;
-    private final ChallengeList challengeList;
+    
+    private ChallengeList challengeList;
 
     private final SimpleWindow window;
 
@@ -100,19 +102,29 @@ public class ChallengeListGUI {
         }
     }
 
-    public void refreshChallenge(Challenge challenge, int challengeSlot) {
-        if (window == null) return;
+    public Challenge getChallengeAtSlot(int slotId) {
+        WindowItem windowItem = window.getItemsPerSlot().get(slotId);
+        if (windowItem == null) return null;
+        ItemProvider builder = windowItem.getBuilder();
 
-        for (Map.Entry<Integer, WindowItem> entry : window.getItemsPerSlot().entrySet()) {
-            int slot = entry.getKey();
-            WindowItem windowItem = entry.getValue();
+        if (builder != null && builder instanceof ChallengeItem challengeItem) {
+            return challengeItem.getChallenge();
+        }
 
-            if (windowItem != null && slot == challengeSlot) {
-                windowItem.setBuilder(new ChallengeItem(window, profile, challenge));
-                windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
-                window.updateSlot(windowItem);
-                break;
-            }
+        return null;
+    }
+
+    public SimpleWindow getWindow() {
+        return window;
+    }
+
+    public ChallengeList getChallengeList() {
+        return challengeList;
+    }
+
+    public void setChallengeList(ChallengeList challengeList) {
+        if (challengeList != null) {
+            this.challengeList = challengeList;
         }
     }
 }

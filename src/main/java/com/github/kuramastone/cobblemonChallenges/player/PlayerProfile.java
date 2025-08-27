@@ -7,6 +7,7 @@ import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.reward.Reward;
+import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
@@ -45,6 +46,10 @@ public class PlayerProfile {
 
         server = CobbleChallengeMod.getMinecraftServer();
         syncPlayer(); // try syncing player object
+    }
+
+    public Map<String, ChallengeListGUI> getWindowGUIMap() {
+        return windowGUIMap;
     }
 
     public void setWindowGUI(String listName, ChallengeListGUI gui) {
@@ -163,7 +168,7 @@ public class PlayerProfile {
             Map<Integer, ChallengeProgress> slots = activeSlotChallenges.computeIfAbsent(list.getName(), k -> new LinkedHashMap<>());
 
             if (challenge.doesNeedSelection()) {
-                if (!slots.isEmpty() && getSlotChallengesInProgress(slot) >= list.getMaxChallengesPerPlayer()) {
+                if (!slots.isEmpty() && getSlotChallengesInProgress(list.getName()) >= list.getMaxChallengesPerPlayer()) {
                     for (Iterator<Map.Entry<Integer, ChallengeProgress>> it = slots.entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry<Integer, ChallengeProgress> entry = it.next();
                         if (entry.getValue().getActiveChallenge().doesNeedSelection()) {
@@ -177,14 +182,22 @@ public class PlayerProfile {
             ChallengeProgress progress = list.buildNewProgressForQuest(challenge, this);
             slots.put(slot, progress);
         } else {
-            if (!list.getChallengeMap().contains(challenge)) {
+            boolean found = false;
+            for (Challenge legacyChallenge : list.getChallengeMap()) {
+                if (legacyChallenge.getName().equals(challenge.getName())) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
                 throw new RuntimeException(String.format("This challenge '%s' is not contained by this challenge list '%s'.", list.getName(), challenge.getName()));
             }
 
             List<ChallengeProgress> progressInList = this.activeChallenges.computeIfAbsent(list.getName(), (key) -> new ArrayList<>());
 
             if (challenge.doesNeedSelection()) {
-                if (!progressInList.isEmpty() && getChallengesInProgress() >= list.getMaxChallengesPerPlayer()) {
+                if (!progressInList.isEmpty() && getChallengesInProgress(list.getName()) >= list.getMaxChallengesPerPlayer()) {
                     for (Iterator<ChallengeProgress> it = progressInList.iterator(); it.hasNext(); ) {
                         ChallengeProgress cp = it.next();
                         if (cp.getActiveChallenge().doesNeedSelection()) {
@@ -197,29 +210,40 @@ public class PlayerProfile {
 
             progressInList.add(list.buildNewProgressForQuest(challenge, this));
         }
+
+        handleOverflowingActiveChallenges();
     }
 
 
 
-    private int getChallengesInProgress() {
+    private int getChallengesInProgress(String listName) {
         int count = 0;
-        for (List<ChallengeProgress> cpList : this.activeChallenges.values()) {
-            for (ChallengeProgress challengeProgress : cpList) {
-                if (challengeProgress.getActiveChallenge().doesNeedSelection()) {
-                    count++;
-                }
+        
+        List<ChallengeProgress> challenges = activeChallenges.get(listName);
+        if (challenges == null) {
+            return 0;
+        }
+
+        for (ChallengeProgress challengeProgress : challenges) {
+            if (challengeProgress.getActiveChallenge().doesNeedSelection()) {
+                count++;
             }
         }
+        
         return count;
     }
 
-    private int getSlotChallengesInProgress(int slot) {
+    private int getSlotChallengesInProgress(String listName) {
         int count = 0;
-        for (Map<Integer, ChallengeProgress> slotMap : this.activeSlotChallenges.values()) {
-            for (ChallengeProgress challengeProgress : slotMap.values()) {
-                if (challengeProgress.getActiveChallenge().doesNeedSelection()) {
-                    count++;
-                }
+
+        Map<Integer, ChallengeProgress> slotMap = activeSlotChallenges.get(listName);
+        if (slotMap == null) {
+            return 0;
+        }
+
+        for (ChallengeProgress challengeProgress : this.activeSlotChallenges.get(listName).values()) {
+            if (challengeProgress.getActiveChallenge().doesNeedSelection()) {
+                count++;
             }
         }
         return count;
@@ -230,6 +254,22 @@ public class PlayerProfile {
         // only add if they dont have it already
         if (progressInList.stream().noneMatch(it -> it.getActiveChallenge().getName().equalsIgnoreCase(cp.getActiveChallenge().getName())))
             progressInList.add(cp);
+
+        handleOverflowingActiveChallenges();
+    }
+
+    private void handleOverflowingActiveChallenges() {
+        for (ChallengeList list : api.getChallengeLists()) {
+            if (api.getConfigOptions().isUsingPools()) {
+                while (!activeSlotChallenges.isEmpty() && getSlotChallengesInProgress(list.getName()) > list.getMaxChallengesPerPlayer()) {
+                    activeSlotChallenges.remove(activeSlotChallenges.keySet().iterator().next());
+                }
+            } else {
+                while (!activeChallenges.isEmpty() && getChallengesInProgress(list.getName()) > list.getMaxChallengesPerPlayer()) {
+                    activeChallenges.get(list.getName()).remove(0);
+                }
+            }
+        }
     }
 
     public ServerPlayer getPlayerEntity() {
@@ -572,27 +612,49 @@ public class PlayerProfile {
 
                 if (windowGUIMap.containsKey(listName)) {
                     ChallengeListGUI listGUI = windowGUIMap.get(listName);
-                    for (int i = 0; i < list.getChallengeMap().size(); i++) {
-                        if (listGUI != null) {
-                            listGUI.refreshChallenge(challengeMap.get(i), i + 1);
+
+                    if (listGUI != null) {
+                        Map<Integer, WindowItem> slotItems = listGUI.getWindow().getItemsPerSlot();
+                        int challengeIndex = 0;
+
+                        for (Map.Entry<Integer, WindowItem> entry : slotItems.entrySet()) {
+                            int slot = entry.getKey();
+
+                            if (challengeIndex < challengeMap.size()) {
+                                Challenge newChallenge = challengeMap.get(challengeIndex++);
+                                String oldChallengeName = entry.getValue().getChallengeName();
+
+                                if (oldChallengeName == null) {
+                                    listGUI.refreshChallengeAtSlot(slot + 1, newChallenge);
+                                } else {
+                                    if (!oldChallengeName.equals(newChallenge.getName())) {
+                                        listGUI.refreshChallengeAtSlot(slot + 1, newChallenge);
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
 
-                Iterator<CompletedChallenge> completedChallengesIt = completedChallenges.iterator();
-                while (completedChallengesIt.hasNext()) {
-                    CompletedChallenge completedChallenge = completedChallengesIt.next();
+                List<ChallengeProgress> activeChallengesForList = activeChallenges.get(listName);
+                if (activeChallengesForList != null) {
+                    Iterator<ChallengeProgress> activeChallengesIt = activeChallengesForList.iterator();
+                    while (activeChallengesIt.hasNext()) {
+                        ChallengeProgress activeChallenge = activeChallengesIt.next();
 
-                    boolean found = false;
-                    for (Challenge challenge : challengeMap) {
-                        if (completedChallenge.challengeID().equals(challenge.getName())) {
-                            found = true;
-                            break;
+                        boolean found = false;
+                        for (Challenge challenge : challengeMap) {
+                            if (activeChallenge.getActiveChallenge().getName().equals(challenge.getName())) {
+                                found = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if (!found) {
-                        completedChallengesIt.remove();
+                        if (!found) {
+                            activeChallengesIt.remove();
+                        }
                     }
                 }
             }

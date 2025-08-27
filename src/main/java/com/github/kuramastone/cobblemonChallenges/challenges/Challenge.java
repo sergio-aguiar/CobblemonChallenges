@@ -48,7 +48,7 @@ public class Challenge {
         long timeToComplete = StringUtils.stringToMilliseconds(section.get("time-limit", "-1"));
         ItemConfig displayItem = new ItemConfig(section.getSection("display-item"));
         long repeatableEveryMilliseconds = StringUtils.stringToMilliseconds(section.get("repeatable", "-1"));
-        repeatableEveryMilliseconds = isUsingPools ? (repeatableEveryMilliseconds > 0 ? repeatableEveryMilliseconds : 1000) : repeatableEveryMilliseconds;
+        repeatableEveryMilliseconds = isUsingPools ? (repeatableEveryMilliseconds > 0 ? repeatableEveryMilliseconds : Long.MAX_VALUE) : repeatableEveryMilliseconds;
         List<Requirement> requirementList = new ArrayList<>();
         List<Reward> rewards = new ArrayList<>();
         int challengeSlot = section.hasKey("challenge-slot") ? section.getInt("challenge-slot") : -1;

@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeItem;
 import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
 import com.mojang.brigadier.StringReader;
@@ -29,13 +30,17 @@ public class WindowItem {
     private Callable<Boolean> lastCondition;
 
     private int slot;
+    private String challengeName;
 
     public WindowItem(@Nullable SimpleWindow window, ItemProvider builder) {
         this.window = window;
         this.builder = builder;
 
         if (builder instanceof ChallengeItem challengeItem) {
-            slot = challengeItem.getChallenge().getSlot();
+            Challenge itemChallenge = challengeItem.getChallenge();
+
+            slot = itemChallenge.getSlot();
+            challengeName = itemChallenge.getName();
         }
     }
 
@@ -45,10 +50,21 @@ public class WindowItem {
         this.runnableOnClick = runnableOnClick;
         this.commands = commands;
         this.pagesToTurn = pagesToTurn;
+
+        if (builder instanceof ChallengeItem challengeItem) {
+            Challenge itemChallenge = challengeItem.getChallenge();
+
+            slot = itemChallenge.getSlot();
+            challengeName = itemChallenge.getName();
+        }
     }
 
     public int getChallengeSlot() {
         return slot;
+    }
+
+    public String getChallengeName() {
+        return challengeName;
     }
 
     public void setWindow(SimpleWindow window) {
@@ -65,6 +81,13 @@ public class WindowItem {
 
     public void setBuilder(ItemProvider builder) {
         this.builder = builder;
+
+        if (builder instanceof ChallengeItem challengeItem) {
+            Challenge itemChallenge = challengeItem.getChallenge();
+
+            slot = itemChallenge.getSlot();
+            challengeName = itemChallenge.getName();
+        }
     }
 
     public ItemStack handleClick(ClickType type, int dragType, Player player) {

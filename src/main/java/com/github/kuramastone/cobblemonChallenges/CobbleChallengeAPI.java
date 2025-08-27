@@ -7,6 +7,7 @@ import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.Progression;
+import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.ConfigOptions;
@@ -372,6 +373,15 @@ public class CobbleChallengeAPI implements SimpleAPI {
 
             ChallengeList cl = ChallengeList.load(this, name, config.getSection("challenge-list"));
             challengeListMap.put(name, cl);
+
+            for (PlayerProfile profile : profileMap.values()) {
+                for (ChallengeListGUI listGUI : profile.getWindowGUIMap().values()) {
+                    if (listGUI.getChallengeList().getName().equals(cl.getName())) {
+                        listGUI.setChallengeList(cl);
+                    }
+                }
+            }
+
             CobbleChallengeMod.logger.info("Loading %s config with %d challenge%s".formatted(name, (getConfigOptions().isUsingPools()) ? cl.getSlotPools().size() : cl.getChallengeMap().size(), ((getConfigOptions().isUsingPools()) ? " slots..." : "s...")));
         }
     }

@@ -82,11 +82,13 @@ public class WindowItem {
     public void setBuilder(ItemProvider builder) {
         this.builder = builder;
 
-        if (builder instanceof ChallengeItem challengeItem) {
+        if (builder != null && builder instanceof ChallengeItem challengeItem) {
             Challenge itemChallenge = challengeItem.getChallenge();
 
-            slot = itemChallenge.getSlot();
-            challengeName = itemChallenge.getName();
+            if (itemChallenge != null) {
+                slot = itemChallenge.getSlot();
+                challengeName = itemChallenge.getName();
+            }
         }
     }
 
@@ -123,7 +125,7 @@ public class WindowItem {
      */
     public void notifyWindow() {
         Objects.requireNonNull(window);
-        window.updateSlot(this);
+        window.updateSlot(this, false);
     }
 
     public Runnable getRunnableOnClick() {

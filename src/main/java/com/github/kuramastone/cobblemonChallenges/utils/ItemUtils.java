@@ -69,6 +69,10 @@ public class ItemUtils {
         return itemStack;
     }
 
+    public static ItemStack emptyItemStack() {
+        return ItemStack.EMPTY;
+    }
+
     public static ItemStack createItemStack(ItemConfig config) {
         return createItemStack(config.getMaterial(), config.getAmount(), FabricAdapter.adapt(ComponentEditor.decorateComponent("&r" + config.getName())),
                 config.getLore() == null ? null : config.getLore().stream()

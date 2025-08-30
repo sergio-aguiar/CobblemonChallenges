@@ -78,6 +78,35 @@ public class SimpleWindow {
         return itemPerSlot.get(realSlot);
     }
 
+    public int getContentIndex(int realSlot) {
+        if (realSlot < 0 || contentSlots == null) {
+            return -1;
+        }
+
+        for (int i = 0; i < contentSlots.size(); i++) {
+            if (contentSlots.get(i).slotID == realSlot) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public int getRealSlot(int contentIndex) {
+        if (contentIndex <= 0 || contentIndex > contentSlots.size()) { 
+            return -1;
+        } else {
+            return contentSlots.get(contentIndex - 1).slotID;
+        }
+    }
+
+    public int getFirstRealSlot() {
+        return contentSlots.get(0).slotID;
+    }
+
+    public int getLastRealSlot() {
+        return contentSlots.get(contentSlots.size() - 1).slotID;
+    }
+
     public Map<Integer, WindowItem> getItemsPerSlot() {
         return itemPerSlot != null ? itemPerSlot : Collections.emptyMap();
     }
@@ -99,13 +128,13 @@ public class SimpleWindow {
      *
      * @param item
      */
-    public void updateSlot(WindowItem item) {
+    public void updateSlot(WindowItem item, boolean updateEmpty) {
         Objects.requireNonNull(item, "Cannot update the slot of a null WindowItem");
 
         for (Map.Entry<Integer, WindowItem> set : this.itemPerSlot.entrySet()) {
             if (set.getValue() == item) {
                 ItemStack display = item.getDisplayItem();
-                if (display != null && display != ItemStack.EMPTY) {
+                if (display != null && (display != ItemStack.EMPTY || updateEmpty)) {
                     gui.setItem(set.getKey(), display);
                 }
             }
@@ -162,7 +191,7 @@ public class SimpleWindow {
         // use a set to avoid duplicate updates
         for (WindowItem item : new HashSet<>(this.itemPerSlot.values())) {
             if(item != null) {
-                updateSlot(item);
+                updateSlot(item, false);
             }
         }
 
@@ -256,7 +285,7 @@ public class SimpleWindow {
     public void notifyAllItems() {
         for (WindowItem value : this.itemPerSlot.values()) {
             if (value != null) {
-                updateSlot(value);
+                updateSlot(value, false);
             }
         }
     }

@@ -51,7 +51,15 @@ public class Challenge {
         repeatableEveryMilliseconds = isUsingPools ? (repeatableEveryMilliseconds > 0 ? repeatableEveryMilliseconds : Long.MAX_VALUE) : repeatableEveryMilliseconds;
         List<Requirement> requirementList = new ArrayList<>();
         List<Reward> rewards = new ArrayList<>();
-        int challengeSlot = section.hasKey("challenge-slot") ? section.getInt("challenge-slot") : -1;
+
+        int challengeSlot = -1;
+        if (section.hasKey("challenge-slot")) {
+            try {
+                challengeSlot = section.getInt("challenge-slot");
+            } catch (Exception e) {
+                CobbleChallengeMod.logger.warn("Invalid challenge-slot value for challenge %s.".formatted(displayName));
+            }
+        }
 
         for (String keyID : section.getKeys("requirements", false)) {
             for (String requirementType : section.getKeys("requirements." + keyID, false)) {

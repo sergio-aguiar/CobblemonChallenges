@@ -62,6 +62,9 @@ public class CommandHandler {
                     .then(Commands.literal("migrate")
                             .requires(source -> hasPermission(source, "challenges.commands.admin.migrate"))
                             .executes(CommandHandler::handleMigrateLegacyCommand))
+                    .then(Commands.literal("resetall")
+                            .requires(source -> hasPermission(source, "challenges.commands.admin.restartall"))
+                            .executes(CommandHandler::handleRestartAllCommand))
             );
         });
 
@@ -71,6 +74,7 @@ public class CommandHandler {
         Player player = EntityArgument.getPlayer(context, "player");
         PlayerProfile profile = CobbleChallengeMod.instance.getAPI().getOrCreateProfile(player.getUUID(), false);
 
+        profile.AddDefaultSlotChallenges();
         profile.resetMissingChallenges();
         profile.resetChallenges();
 
@@ -78,6 +82,17 @@ public class CommandHandler {
         return 1;
     }
 
+    private static int handleRestartAllCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        for (PlayerProfile profile : CobbleChallengeMod.instance.getAPI().getProfiles()) {
+            profile.AddDefaultSlotChallenges();
+            profile.resetMissingChallenges();
+            profile.resetChallenges();
+        }
+
+        CobbleChallengeMod.instance.getAPI().saveProfiles();
+        context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.restartall")));
+        return 1;
+    }
 
     private static boolean hasPermission(CommandSourceStack source, String perm) {
         return source.hasPermission(2) || (source.isPlayer() && PermissionUtils.hasPermission(source.getPlayer(), perm));
@@ -95,14 +110,6 @@ public class CommandHandler {
 
     private static int handleReloadCommand(CommandContext<CommandSourceStack> context) {
         api.reloadConfig();
-
-        for (PlayerProfile profile : api.getProfiles()) {
-            if (profile.isOnline()) {
-                profile.resetMissingChallenges();
-                profile.AddDefaultSlotChallenges();
-            }
-        }
-
         context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.reload")));
         return 1;
     }
@@ -269,8 +276,8 @@ public class CommandHandler {
             api.reloadConfig();
             for (PlayerProfile profile : api.getProfiles()) {
                 if (profile.isOnline()) {
-                    profile.resetMissingChallenges();
                     profile.AddDefaultSlotChallenges();
+                    profile.resetMissingChallenges();
                 }
             }
 

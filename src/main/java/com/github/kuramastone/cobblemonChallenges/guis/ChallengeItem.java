@@ -36,6 +36,9 @@ public class ChallengeItem implements ItemProvider {
 
     @Override
     public ItemStack build() {
+        if (this.challenge == null) {
+            return ItemUtils.emptyItemStack();
+        }
 
         ItemStack item = FabricAdapter.toItemStack(challenge.getDisplayConfig());
 

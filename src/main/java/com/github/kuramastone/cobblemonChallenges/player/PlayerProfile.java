@@ -7,7 +7,9 @@ import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import com.github.kuramastone.cobblemonChallenges.challenges.CompletedChallenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.reward.Reward;
+import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
+import com.github.kuramastone.cobblemonChallenges.guis.ChallengeItem;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
@@ -18,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlayerProfile {
 
@@ -123,7 +126,9 @@ public class PlayerProfile {
                         if (!challenge.doesNeedSelection()) {
                             if (!isChallengeCompleted(challenge.getName())) {
                                 if (!isChallengeInProgress(challenge.getName())) {
-                                    if (availableSlotChallenges.get(challengeList.getName()).get(challenge.getSlot()).getName().equals(challenge.getName())) {
+                                    Map<Integer, Challenge> slotChallenges = availableSlotChallenges.getOrDefault(challengeList.getName(), Collections.emptyMap());
+                                    Challenge slotChallenge = slotChallenges.get(challenge.getSlot());
+                                    if (slotChallenge != null && slotChallenge.getName().equals(challenge.getName())) {
                                         addActiveChallenge(challengeList, challenge, challenge.getSlot());
                                     }
                                 }
@@ -490,6 +495,10 @@ public class PlayerProfile {
         }
     }
 
+    public void resetAvailableSlotChallenges() {
+        availableSlotChallenges.clear();
+    }
+
     public void setSlotChallenge(String list, int slot, Challenge challenge) {
         availableSlotChallenges
             .computeIfAbsent(list, k -> new HashMap<>())
@@ -553,14 +562,14 @@ public class PlayerProfile {
         if (api.getConfigOptions().isUsingPools()) {
             for (ChallengeList list : api.getChallengeLists()) {
                 String listName = list.getName();
-                Map<Integer, Challenge> listOfAvailableSlots = availableSlotChallenges.get(listName);
+                Map<Integer, Challenge> listOfAvailableSlots = availableSlotChallenges.getOrDefault(listName, Collections.emptyMap());
 
                 for (Map.Entry<Integer, Challenge> challengeSlotEntry : listOfAvailableSlots.entrySet()) {
                     int slot = challengeSlotEntry.getKey();
                     Challenge availableChallenge = challengeSlotEntry.getValue();
 
                     boolean found = false;
-                    List<Challenge> listOfPossibleChallenges = list.getSlotPools().get(slot);
+                    List<Challenge> listOfPossibleChallenges = list.getSlotPools().getOrDefault(slot, Collections.emptyList());
                     for (Challenge challengeForSlot : listOfPossibleChallenges) {
                         if (availableChallenge.getName().equals(challengeForSlot.getName())) {
                             found = true;
@@ -568,7 +577,7 @@ public class PlayerProfile {
                         }
                     }
 
-                    if (!found) {
+                    if (!found && !listOfPossibleChallenges.isEmpty()) {
                         Challenge defaultChallenge = listOfPossibleChallenges.getFirst();
                         listOfAvailableSlots.put(slot, defaultChallenge);
 
@@ -579,18 +588,20 @@ public class PlayerProfile {
                     }
                 }
 
-                for (CompletedChallenge completedChallenge : completedChallenges) {
+                Iterator<CompletedChallenge> iterator = completedChallenges.iterator();
+                while (iterator.hasNext()) {
+                    CompletedChallenge completedChallenge = iterator.next();
                     if (!completedChallenge.challengeListID().equals(listName)) continue;
 
                     Challenge comChallenge = list.getChallenge(completedChallenge.challengeID());
 
                     if (comChallenge == null) {
-                        completedChallenges.remove(completedChallenge);
-                        return;
+                        iterator.remove();
+                        continue;
                     }
 
                     int comChallengeSlot = comChallenge.getSlot();
-                    List<Challenge> listOfPossibleChallenges = list.getSlotPools().get(comChallengeSlot);
+                    List<Challenge> listOfPossibleChallenges = list.getSlotPools().getOrDefault(comChallengeSlot, Collections.emptyList());
 
                     boolean found = false;
                     for (Challenge ch : listOfPossibleChallenges) {
@@ -601,7 +612,7 @@ public class PlayerProfile {
                     }
 
                     if (!found) {
-                        completedChallenges.remove(completedChallenge);
+                        iterator.remove();
                     }
                 }
             }
@@ -658,6 +669,85 @@ public class PlayerProfile {
                     }
                 }
             }
+        }
+    }
+
+    public void resetUnneededSlots() {
+        for (ChallengeList list : api.getChallengeLists()) {
+            String listName = list.getName();
+
+            ChallengeListGUI gui = windowGUIMap.get(listName);
+            if (gui == null) continue;
+            SimpleWindow window = gui.getWindow();
+            if (window == null) continue;
+
+            String itemsPerSlotString = window.getItemsPerSlot().entrySet().stream()
+                .map(e -> {
+                    WindowItem item = e.getValue();
+                    if (item == null) {
+                        return "ItemsPerSlot: <" + e.getKey() + ", (0, null)>";
+                    } else {
+                        return "ItemsPerSlot: <" + e.getKey() + ", (" + item.getChallengeSlot() + ", " + item.getChallengeName() + ")>";
+                    }
+                })
+                .collect(Collectors.joining(", "));
+            if (isOnline()) CobbleChallengeMod.logger.info(itemsPerSlotString);
+
+            int initialRealSlotID = window.getFirstRealSlot();
+            int getLastRealSlotID = window.getLastRealSlot();
+            window.getItemsPerSlot().replaceAll((slot, windowItem) -> {
+                if (slot < initialRealSlotID || slot > getLastRealSlotID) return windowItem;
+
+                List<Challenge> slotChallenges = list.getSlotPools().getOrDefault(window.getContentIndex(slot), Collections.emptyList());
+
+                if (isOnline()) {
+                    String slotChallengesString = slotChallenges.stream()
+                        .map(c -> "(" + c.getSlot() + ", " + c.getName() + ")")
+                        .collect(Collectors.joining(", "));
+                    CobbleChallengeMod.logger.info("<%d, %s>".formatted(slot, slotChallengesString.isEmpty() ? "(0, null)" : slotChallengesString));
+
+                    CobbleChallengeMod.logger.info("Checking slot %d, pool size=%d, item=%s"
+                        .formatted(slot, slotChallenges.size(), 
+                                windowItem == null ? "null" : windowItem.getChallengeName()));
+                }
+
+                if (slotChallenges.isEmpty() && windowItem.getChallengeName() != null && windowItem.getChallengeSlot() > 0) {
+                    int realSlotID = window.getRealSlot(slot);
+                    CobbleChallengeMod.logger.info("Not null: <%d, %s> real slot: %d".formatted(windowItem.getChallengeSlot(), windowItem.getChallengeName(), realSlotID));
+                    windowItem.setBuilder(new ChallengeItem(window, this, null));
+                    window.updateSlot(windowItem, true);
+                }
+
+                return windowItem; 
+            });
+
+            /* Iterator<Map.Entry<Integer, WindowItem>> it = window.getItemsPerSlot().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Integer, WindowItem> entry = it.next();
+                int slot = entry.getKey();
+
+                if (api.getConfigOptions().isUsingPools()) {
+                    List<Challenge> slotChallenges = list.getSlotPools().getOrDefault(slot - 1, Collections.emptyList());
+
+                    String slotChallengesString = slotChallenges.stream()
+                        .map(c -> "(" + c.getSlot() + ", " + c.getName() + ")")
+                        .collect(Collectors.joining(", "));
+                    if (isOnline()) CobbleChallengeMod.logger.info("SlotChallenges: %s".formatted(slotChallengesString));
+
+                    if (slotChallenges.isEmpty()) {
+                        it.remove();
+                        gui.refreshChallengeAtSlot(slot, null);
+                    }
+                } else {
+                    List<Challenge> challengeMap = list.getChallengeMap();
+                    if (slot <= 0 || slot > challengeMap.size()) {
+                        it.remove();
+                        gui.refreshChallengeAtSlot(slot, null);
+                    }
+                }
+            } */
+
+            window.buildInventory();
         }
     }
 }

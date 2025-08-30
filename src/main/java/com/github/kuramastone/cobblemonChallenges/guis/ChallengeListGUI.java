@@ -95,10 +95,11 @@ public class ChallengeListGUI {
         if (window == null) return;
 
         WindowItem windowItem = window.getItemAtContentSlot(slot);
+
         if (windowItem != null) {
             windowItem.setBuilder(new ChallengeItem(window, profile, challenge));
-            windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
-            window.updateSlot(windowItem);
+            if (challenge != null) windowItem.setRunnableOnClick(onChallengeClick(challenge, windowItem, slot));
+            window.updateSlot(windowItem, false);
         }
     }
 

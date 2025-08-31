@@ -711,7 +711,7 @@ public class PlayerProfile {
                                 windowItem == null ? "null" : windowItem.getChallengeName()));
                 }
 
-                if (slotChallenges.isEmpty() && windowItem.getChallengeName() != null && windowItem.getChallengeSlot() > 0) {
+                if (slotChallenges.isEmpty() && windowItem != null && windowItem.getChallengeName() != null && windowItem.getChallengeSlot() > 0) {
                     int realSlotID = window.getRealSlot(slot);
                     CobbleChallengeMod.logger.info("Not null: <%d, %s> real slot: %d".formatted(windowItem.getChallengeSlot(), windowItem.getChallengeName(), realSlotID));
                     windowItem.setBuilder(new ChallengeItem(window, this, null));
@@ -720,34 +720,6 @@ public class PlayerProfile {
 
                 return windowItem; 
             });
-
-            /* Iterator<Map.Entry<Integer, WindowItem>> it = window.getItemsPerSlot().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Integer, WindowItem> entry = it.next();
-                int slot = entry.getKey();
-
-                if (api.getConfigOptions().isUsingPools()) {
-                    List<Challenge> slotChallenges = list.getSlotPools().getOrDefault(slot - 1, Collections.emptyList());
-
-                    String slotChallengesString = slotChallenges.stream()
-                        .map(c -> "(" + c.getSlot() + ", " + c.getName() + ")")
-                        .collect(Collectors.joining(", "));
-                    if (isOnline()) CobbleChallengeMod.logger.info("SlotChallenges: %s".formatted(slotChallengesString));
-
-                    if (slotChallenges.isEmpty()) {
-                        it.remove();
-                        gui.refreshChallengeAtSlot(slot, null);
-                    }
-                } else {
-                    List<Challenge> challengeMap = list.getChallengeMap();
-                    if (slot <= 0 || slot > challengeMap.size()) {
-                        it.remove();
-                        gui.refreshChallengeAtSlot(slot, null);
-                    }
-                }
-            } */
-
-            window.buildInventory();
         }
     }
 }

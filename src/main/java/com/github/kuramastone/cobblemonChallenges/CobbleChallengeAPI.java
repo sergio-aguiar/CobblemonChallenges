@@ -377,9 +377,12 @@ public class CobbleChallengeAPI implements SimpleAPI {
             challengeListMap.put(name, cl);
 
             for (PlayerProfile profile : profileMap.values()) {
-                for (ChallengeListGUI listGUI : profile.getWindowGUIMap().values()) {
-                    if (listGUI.getChallengeList().getName().equals(cl.getName())) {
-                        listGUI.setChallengeList(cl);
+                Map<String, ChallengeListGUI> windowGUIMap = profile.getWindowGUIMap();
+                if (windowGUIMap != null) {
+                    for (ChallengeListGUI listGUI : windowGUIMap.values()) {
+                        if (listGUI.getChallengeList().getName().equals(cl.getName())) {
+                            listGUI.setChallengeList(cl);
+                        }
                     }
                 }
             }

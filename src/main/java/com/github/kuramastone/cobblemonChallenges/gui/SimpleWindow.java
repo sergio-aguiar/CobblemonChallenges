@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
 import com.github.kuramastone.bUtilities.ComponentEditor;
+import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Create a chest inventory using data from a GuiConfig.
@@ -104,6 +106,9 @@ public class SimpleWindow {
     }
 
     public int getLastRealSlot() {
+        CobbleChallengeMod.logger.info(contentSlots.stream()
+            .map(slot -> String.valueOf(slot.slotID))
+            .collect(Collectors.joining(", ", "[", "]")));
         return contentSlots.get(contentSlots.size() - 1).slotID;
     }
 
@@ -331,4 +336,7 @@ public class SimpleWindow {
         }
     }
 
+    public List<Integer> getContentSlots() {
+        return contentSlots.stream().map(slot -> slot.slotID).toList();
+    }
 }

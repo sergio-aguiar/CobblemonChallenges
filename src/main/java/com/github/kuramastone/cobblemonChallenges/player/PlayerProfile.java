@@ -693,9 +693,37 @@ public class PlayerProfile {
                 .collect(Collectors.joining(", "));
             if (isOnline()) CobbleChallengeMod.logger.info(itemsPerSlotString);
 
-            int initialRealSlotID = window.getFirstRealSlot();
+            Map<Integer, WindowItem> itemsPerSlot = window.getItemsPerSlot();
+            List<Integer> realContentIndexes = window.getContentSlots();
+
+            for (int realIndex : realContentIndexes) {
+                int contentIndex = window.getContentIndex(realIndex);
+                List<Challenge> slotChallenges = list.getSlotPools().getOrDefault(contentIndex, Collections.emptyList());
+
+                if (isOnline()) {
+                    String slotChallengesString = slotChallenges.stream()
+                        .map(c -> "(" + c.getSlot() + ", " + c.getName() + ")")
+                        .collect(Collectors.joining(", "));
+                    CobbleChallengeMod.logger.info("<%d (content=%d), %s>".formatted(realIndex, contentIndex, slotChallengesString.isEmpty() ? "(?, null)" : slotChallengesString));
+                }
+
+                WindowItem slotWindowItem = itemsPerSlot.get(realIndex);
+                if (slotChallenges.isEmpty()) {
+                    CobbleChallengeMod.logger.info("Replace with empty at realSlot=%d (content=%d)".formatted(realIndex, contentIndex));
+                    if (slotWindowItem != null) {
+                        slotWindowItem.setBuilder(new ChallengeItem(window, this, null));
+                    } else {
+                        slotWindowItem = new WindowItem(window, new ChallengeItem(window, this, null));
+                        itemsPerSlot.put(realIndex, slotWindowItem);
+                    }
+                    window.updateSlot(slotWindowItem, true);
+                }
+            }
+
+            /* int initialRealSlotID = window.getFirstRealSlot();
             int getLastRealSlotID = window.getLastRealSlot();
             window.getItemsPerSlot().replaceAll((slot, windowItem) -> {
+                CobbleChallengeMod.logger.info("initialRealSlotID=%d , getLastRealSlotID=%d".formatted(initialRealSlotID, getLastRealSlotID));
                 if (slot < initialRealSlotID || slot > getLastRealSlotID) return windowItem;
 
                 List<Challenge> slotChallenges = list.getSlotPools().getOrDefault(window.getContentIndex(slot), Collections.emptyList());
@@ -704,22 +732,29 @@ public class PlayerProfile {
                     String slotChallengesString = slotChallenges.stream()
                         .map(c -> "(" + c.getSlot() + ", " + c.getName() + ")")
                         .collect(Collectors.joining(", "));
-                    CobbleChallengeMod.logger.info("<%d, %s>".formatted(slot, slotChallengesString.isEmpty() ? "(0, null)" : slotChallengesString));
+                    CobbleChallengeMod.logger.info("<%d, %s>".formatted(slot, slotChallengesString.isEmpty() ? "(?, null)" : slotChallengesString));
 
                     CobbleChallengeMod.logger.info("Checking slot %d, pool size=%d, item=%s"
                         .formatted(slot, slotChallenges.size(), 
                                 windowItem == null ? "null" : windowItem.getChallengeName()));
                 }
 
-                if (slotChallenges.isEmpty() && windowItem != null && windowItem.getChallengeName() != null && windowItem.getChallengeSlot() > 0) {
-                    int realSlotID = window.getRealSlot(slot);
-                    CobbleChallengeMod.logger.info("Not null: <%d, %s> real slot: %d".formatted(windowItem.getChallengeSlot(), windowItem.getChallengeName(), realSlotID));
-                    windowItem.setBuilder(new ChallengeItem(window, this, null));
-                    window.updateSlot(windowItem, true);
+                if (slotChallenges.isEmpty()) {
+                    CobbleChallengeMod.logger.info("Replace with empty: <?, null>");
+                    if (windowItem != null) {
+                        windowItem.setBuilder(new ChallengeItem(window, this, null));
+                        window.updateSlot(windowItem, true);
+                    }
+                } else {
+                    if (windowItem != null && windowItem.getChallengeName() != null && windowItem.getChallengeSlot() > 0) {
+                        CobbleChallengeMod.logger.info("Dont replace: <%d, %s>".formatted(windowItem.getChallengeSlot(), windowItem.getChallengeName()));
+                    }
                 }
 
                 return windowItem; 
             });
+
+            window.buildInventory(); */
         }
     }
 }

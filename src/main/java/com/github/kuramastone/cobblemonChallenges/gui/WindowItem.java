@@ -36,11 +36,13 @@ public class WindowItem {
         this.window = window;
         this.builder = builder;
 
-        if (builder instanceof ChallengeItem challengeItem) {
+        if (builder != null && builder instanceof ChallengeItem challengeItem) {
             Challenge itemChallenge = challengeItem.getChallenge();
 
-            slot = itemChallenge.getSlot();
-            challengeName = itemChallenge.getName();
+            if (itemChallenge != null) {
+                slot = itemChallenge.getSlot();
+                challengeName = itemChallenge.getName();
+            }
         }
     }
 

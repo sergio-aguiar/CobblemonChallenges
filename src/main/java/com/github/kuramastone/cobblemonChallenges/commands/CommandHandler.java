@@ -52,9 +52,9 @@ public class CommandHandler {
                             .suggests(CommandHandler::handleListSuggestions)
                             .executes(CommandHandler::handleChallengeListCommand)
                     )
-                    .then(Commands.literal("reload")
-                            .requires(source -> hasPermission(source, "challenges.commands.admin.reload"))
-                            .executes(CommandHandler::handleReloadCommand))
+                    //.then(Commands.literal("reload")
+                    //        .requires(source -> hasPermission(source, "challenges.commands.admin.reload"))
+                    //        .executes(CommandHandler::handleReloadCommand))
                     .then(Commands.literal("reset")
                             .requires(source -> hasPermission(source, "challenges.commands.admin.restart"))
                             .then(Commands.argument("player", EntityArgument.player())
@@ -269,17 +269,9 @@ public class CommandHandler {
                     profile.getActiveChallengesMap().remove(listName);
                 }
             }
-            api.saveProfiles();
+            api.reloadConfig();
 
             source.sendSystemMessage(Component.literal("Migrated " + migratedCount + " legacy challenges to slot-based mode.").withStyle(ChatFormatting.GREEN));
-
-            api.reloadConfig();
-            for (PlayerProfile profile : api.getProfiles()) {
-                if (profile.isOnline()) {
-                    profile.AddDefaultSlotChallenges();
-                    profile.resetMissingChallenges();
-                }
-            }
 
             context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.migrate")));
             return 1;

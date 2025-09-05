@@ -178,7 +178,7 @@ public class CobbleChallengeAPI implements SimpleAPI {
 
                 profile.resetAvailableSlotChallenges();
                 profile.AddDefaultSlotChallenges();
-                profile.resetUnneededSlots();
+                // profile.resetUnneededSlots();
                 profile.resetMissingChallenges();
                 // only add unrestricted challenges after adding saved challenges
                 profile.addUnrestrictedChallenges();

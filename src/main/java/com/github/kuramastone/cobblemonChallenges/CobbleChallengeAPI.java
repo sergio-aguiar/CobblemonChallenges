@@ -99,6 +99,10 @@ public class CobbleChallengeAPI implements SimpleAPI {
                                             }
 
                                             profile.setProgressForSlot(list.getName(), slot, progress);
+
+                                            if (!challenge.doesNeedSelection()) {
+                                                profile.addActiveChallenge(progress);
+                                            }
                                         }
                                     }
 
@@ -176,7 +180,6 @@ public class CobbleChallengeAPI implements SimpleAPI {
                     }
                 }
 
-                profile.resetAvailableSlotChallenges();
                 profile.AddDefaultSlotChallenges();
                 // profile.resetUnneededSlots();
                 profile.resetMissingChallenges();
@@ -429,7 +432,7 @@ public class CobbleChallengeAPI implements SimpleAPI {
         if (addChallenges && !profileExists) {
             pp.AddDefaultSlotChallenges();
             pp.resetMissingChallenges();
-            pp.addUnrestrictedChallenges(); // add challenges that dont require selection
+            // pp.addUnrestrictedChallenges(); // add challenges that dont require selection
         }
         return pp;
     }

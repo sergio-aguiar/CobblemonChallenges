@@ -1,0 +1,211 @@
+gui:
+  # This is the title at the top of the gui.
+  window-name: "&l&Christmas 2025"
+  # This is the structure. Each row must have 9 characters (ignoring spaces), and it cannot be more than 6 rows in length.
+  # '.' is a blank character that represents the contents of a list.
+  structure:
+    - "B # * # * # * # *"
+    - "# * . . . . . * #"
+    - "* # * # * # * # *"
+
+  # Each character, besides spaces, has an attached itemstack. Define the itemstack here.
+  ingredients:
+    '#':
+      material: BLUE_STAINED_GLASS_PANE
+      name: " "
+    '*':
+      material: WHITE_STAINED_GLASS_PANE
+      name: " "
+    'B':
+      material: BARRIER
+      name: "&l&eBack to Main Page"
+      lore:
+        - "&7Click me to go back to the challenge menu!"
+      commands: #Commands executed on click.
+        - "execute as {player} run challenges" # this will return them to the base menu.
+
+# These are the challenges found inside this gui.
+challenge-list:
+  # How many challenges a player can attempt at the same time. Does not include challenges that dont require selection.
+  max-challenges-per-player: 0
+
+  # The list of challenges.
+  challenges:
+    "CatchPokemonExample-Ice":
+      # The challenge name to be used for challenge expiration/completion/refresh/randomization messages. If missing, the default name/id will be used by default.
+      display-name: "Catch 5 Ice Pokémon"
+      # Time the player has to complete the challenge since accepting it. If the timer runs out, progress will be lost for the challenge and it will reset to not being accepted.
+      time-limit: "30d" # Give them a full month to complete.
+      # If set to false, this challenge does not need to be clicked in order to be started.
+      needs-selection: false
+      # This is used to define a challenge's slot. Start defining slots from 1 and go up from there. Challenges using the same slot value will in the same pool to choose from when refreshing a slot with a new challenge.
+      challenge-slot: 1
+      # This is used inside the item's lore and in the message sent when a challenge is completed.
+      description:
+        - "&7Catch 5 Ice Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      # This is the itemstack that displays in the gui.
+      display-item:
+        # supports modded items and vanilla items. for modded items, include their initial tag such as "cobblemon:master_ball".
+        material: cobblemon:dive_ball
+        name: "&e&lCatch 5 Ice Pokémon"
+        # {progression_status} can be customized in config.yml under Messages.
+        # {description} is the same as shown above.
+        # {tracking-tag} is the countdown timer for both the challenge expiration and refresh timers.
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      # Each challenge can have multiple challenge requirements. List each one under a different number which is used to sort them, so their exact value doesnt actually matter.
+      # See config.yml for more information about each challenge requirement.
+      requirements:
+        1:
+          Catch_Pokemon:
+            pokename: any
+            shiny: false
+            type: ice
+            ball: any
+            amount: 5
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      # These commands will be sent when all requirements have been completed.
+      # {player} will be replaced with their username.
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "DefeatPokemonExample-Ice":
+      display-name: "Defeat 10 Ice Pokémon"
+      time-limit: "30d"
+      needs-selection: false
+      challenge-slot: 2
+      description:
+        - "&3Defeat 10 Ice Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:never_melt_ice
+        name: "&e&lDefeat 10 Ice Pokémon"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          defeat_battler:
+            pokename: any
+            shiny: false
+            type: ice
+            amount: 10
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "DefeatPokemonExample-Articuno":
+      display-name: "Defeat an Articuno"
+      time-limit: "30d"
+      needs-selection: false
+      challenge-slot: 3
+      description:
+        - "&3Defeat an Articuno and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:choice_band
+        name: "&e&lDefeat an Articuno"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          defeat_battler:
+            pokename: Articuno
+            shiny: false
+            type: any
+            amount: 1
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "EvolvePokemonExample-Ice":
+      display-name: "Evolve 3 Ice Pokémon"
+      time-limit: "30d"
+      needs-selection: false
+      challenge-slot: 4
+      description:
+        - "&7Evolve 3 Ice Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: ice
+        name: "&e&lEvolve a Pokémon"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          evolve_pokemon:
+            pokename: any
+            shiny: false
+            type: ice
+            amount: 3
+            time_of_day: any
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "EvolvePokemonExample-Glaceon":
+      display-name: "Evolve an Eevee into a Glaceon"
+      time-limit: "30d"
+      needs-selection: false
+      challenge-slot: 5
+      description:
+        - "&7Evolve an Eevee into a Glaceon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:ice_stone
+        name: "&e&lEvolve an Eevee into a Glaceon"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          evolve_pokemon:
+            pokename: Glaceon
+            shiny: false
+            type: any
+            amount: 1
+            time_of_day: any
+      rewards:
+        commands:
+          - "eco give {player} 100"

@@ -109,6 +109,10 @@ public class CobbleChallengeMod implements ModInitializer {
                                             if (replacement != null) {
                                                 profile.setAvailableSlotChallenge(cl.getName(), slot, replacement);
 
+                                                if (!replacement.doesNeedSelection()) {
+                                                    profile.addActiveChallenge(cl, replacement, replacement.getSlot());
+                                                }
+
                                                 List<String> lines = List.of(StringUtils.splitByLineBreak(
                                                         api.getMessage(
                                                                 "challenges.randomized",
@@ -215,6 +219,12 @@ public class CobbleChallengeMod implements ModInitializer {
                                     for (ExpiredSlot ex : expiredSlots) {
                                         profile.removeProgressForSlot(ex.listName, ex.slot);
 
+                                        Challenge ch = ex.cp.getActiveChallenge();
+
+                                        if (!ch.doesNeedSelection()) {
+                                            profile.addActiveChallenge(ex.cp.getParentList(), ch, ch.getSlot());
+                                        }
+
                                         CobbleChallengeMod.logger.info("Resetting expired slot {} challenge {} for player {} in list {}",
                                                 ex.slot, ex.cp.getActiveChallenge().getName(), profile.getUUID(), ex.listName);
 
@@ -255,11 +265,17 @@ public class CobbleChallengeMod implements ModInitializer {
                                                 CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());
                                                 list.remove(cp);
 
+                                                Challenge ch = cp.getActiveChallenge();
+
+                                                if (!ch.doesNeedSelection()) {
+                                                    profile.addActiveChallenge(cp.getParentList().buildNewProgressForQuest(ch, profile));
+                                                }
+
                                                 List<String> lines = List.of(StringUtils.splitByLineBreak(
                                                     api.getMessage(
                                                         "challenges.expired",
-                                                        "{challenge}", cp.getActiveChallenge().getDisplayName(),
-                                                        "{challenge-description}", cp.getActiveChallenge().getDescription()
+                                                        "{challenge}", ch.getDisplayName(),
+                                                        "{challenge-description}", ch.getDescription()
                                                     ).getText()
                                                 ));
                                                 List<String> formatted = StringUtils.centerStringListTags(lines);
@@ -328,7 +344,7 @@ public class CobbleChallengeMod implements ModInitializer {
         CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.HIGHEST, ChallengeListener::onEggHatch);
         CobblemonEvents.EXPERIENCE_GAINED_EVENT_POST.subscribe(Priority.HIGHEST, ChallengeListener::onExpGained);
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.HIGHEST, ChallengeListener::onLevelUp);
-        CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.HIGHEST, ChallengeListener::onTradeCompleted);
+        CobblemonEvents.TRADE_EVENT_POST.subscribe(Priority.HIGHEST, ChallengeListener::onTradeCompleted);
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.HIGHEST, ChallengeListener::onFossilRevived);
     }
 

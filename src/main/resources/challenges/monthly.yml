@@ -1,12 +1,16 @@
 gui:
+  # This is the title at the top of the gui.
   window-name: "&l&eMonthly Challenges"
+  # This is the structure. Each row must have 9 characters (ignoring spaces), and it cannot be more than 6 rows in length.
+  # '.' is a blank character that represents the contents of a list.
   structure:
     - "B # # # # # # # #"
     - "# . . . . . . . #"
     - "# . . . . . . . #"
-    - "# . . . . . . . #"
-    - "# . . . . . . . #"
+    - "# # . . . . . # #"
     - "< # # # # # # # >"
+
+  # Each character, besides spaces, has an attached itemstack. Define the itemstack here.
   ingredients:
     '#':
       material: BLACK_STAINED_GLASS_PANE
@@ -16,8 +20,8 @@ gui:
       name: "&l&eBack to Main Page"
       lore:
         - "&7Click me to go back to the challenge menu!"
-      commands:
-        - "execute as {player} run challenges" # this will return them to the base menu
+      commands: #Commands executed on click.
+        - "execute as {player} run challenges" # this will return them to the base menu.
     '<':
       material: ARROW
       name: "&l&ePrevious"
@@ -30,140 +34,61 @@ gui:
       name: "&l&eNext"
       lore:
         - "&7Click me to go to the next page."
-challenge-list:
-  max-challenges-per-player: 999
-  challenges:
-    "Complete 50 Pokedex Entries":
-      needs-selection: false
-      time-limit: "30d"
-      description:
-        - "&7Become a Pokémon Master by filling 50 Pokédex entries!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &71 XP Share"
-        - "    &d- &7+10,000$"
-      display-item:
-        material: ENCHANTED_BOOK
-        name: "&e&lComplete 50 Pokédex Entries"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-      requirements:
-        1:
-          pokemon_scanned:
-            amount: 50
-      rewards:
-        commands:
-          - "give {player} cobblemon:xp_share 1"
-          - "eco give {player} 10000"
 
-    "Complete 20 Challenges":
-      needs-selection: false
-      time-limit: "30d"
+# These are the challenges found inside this gui.
+challenge-list:
+  # How many challenges a player can attempt at the same time. Does not include challenges that dont require selection.
+  max-challenges-per-player: 1
+
+  # The list of challenges. Just fill it based on examples from daily.yml.
+  challenges:
+    "CatchPokemonExample-Any30":
+      # The challenge name to be used for challenge expiration/completion/refresh/randomization messages. If missing, the default name/id will be used by default.
+      display-name: "Catch Any 30 Pokémon"
+      # Time it takes for a challenge to refresh. If using pool-mode and a slot has multiple challenges, one of the same slot will be picked at random to replace the last completed one upon refresh timer trigger.
+      repeatable: 30d
+      # Time the player has to complete the challenge since accepting it. If the timer runs out, progress will be lost for the challenge and it will reset to not being accepted.
+      time-limit: "30d" # Give them a full month to complete.
+      # If set to false, this challenge does not need to be clicked in order to be started.
+      needs-selection: true
+      # This is used to define a challenge's slot. Start defining slots from 1 and go up from there. Challenges using the same slot value will in the same pool to choose from when refreshing a slot with a new challenge.
+      challenge-slot: 1
+      # This is used inside the item's lore and in the message sent when a challenge is completed.
       description:
-        - "&7Complete 20 challenges!"
+        - "&7Catch 30 Pokémon and receive these rewards!"
         - " "
         - "    &dRewards:"
         - "    &d- &7+3000$"
+      # This is the itemstack that displays in the gui.
       display-item:
-        material: BOOK
-        name: "&e&lComplete 20 Challenges"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-      requirements:
-        1:
-          complete_challenge: # ChallengeCompletedEvent
-            amount: 20
-            challenge-list: any # Use any challenge list name here
-      rewards:
-        commands:
-          - "eco give {player} 3000"
-
-    "Battle Wins Milestone":
-      needs-selection: false
-      time-limit: "30d"
-      description:
-        - "&7Prove your strength by winning 30 battles!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &7+5000$"
-        - "    &d- &7A Rare Candy"
-      display-item:
-        material: IRON_SWORD
-        name: "&e&lWin 30 Battles"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-      requirements:
-        1:
-          defeat_battler:
-            amount: 30
-      rewards:
-        commands:
-          - "give {player} cobblemon:rare_candy 1"
-          - "eco give {player} 5000"
-
-    "See 100 Pokemon":
-      needs-selection: false
-      time-limit: "30d"
-      description:
-        - "&7See 100 new pokemon!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &7+5000$"
-        - "    &d- &7A Rare Candy"
-      display-item:
-        material: cobblemon:poke_ball
-        name: "&e&lSee 100 pokemon!"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-      requirements:
-        1:
-          pokemon_seen:
-            amount: 100
-            pokename: any
-      rewards:
-        commands:
-          - "give {player} cobblemon:rare_candy 1"
-          - "eco give {player} 5000"
-          -
-    "Complete a Trade":
-      needs-selection: true
-      time-limit: "24h"
-      description:
-        - "&7Complete a Pokémon trade!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &72 Rare Candies"
-        - "    &d- &7150$"
-      display-item:
-        material: EMERALD
-        name: "&e&lComplete a Trade"
+        # supports modded items and vanilla items. for modded items, include their initial tag such as "cobblemon:master_ball".
+        material: cobblemon:master_ball
+        name: "&e&lCatch 30 Pokémon"
+        # {progression_status} can be customized in config.yml under Messages.
+        # {description} is the same as shown above.
+        # {tracking-tag} is the countdown timer for both the challenge expiration and refresh timers.
         lore:
           - "{progression_status}"
           - " "
           - "{description}"
           - " "
           - "{tracking-tag}"
+      # Each challenge can have multiple challenge requirements. List each one under a different number which is used to sort them, so their exact value doesnt actually matter.
+      # See config.yml for more information about each challenge requirement.
       requirements:
         1:
-          trades_completed:
+          Catch_Pokemon:
             pokename: any
             shiny: false
             type: any
             ball: any
-            amount: 1
+            amount: 30
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
+      # These commands will be sent when all requirements have been completed.
+      # {player} will be replaced with their username.
       rewards:
         commands:
-          - "give {player} cobblemon:rare_candy 2"
-          - "eco give {player} 150"
+          - "eco give {player} 3000"

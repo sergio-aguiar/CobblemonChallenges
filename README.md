@@ -10,8 +10,14 @@ Compatible with LuckPerms permissions!
     - Permission: "challenges.commands.challenge"
 - **/challenges [type]**: Open the challenge list directly without needing the menu.
     - Permission: "challenges.commands.challenge"
-- **/challenges reload**: Reload all challenges and guis!
+- **/challenges reload**: Reload all challenges and guis! **CURRENTLY DISABLED**
     - Permission: "challenges.commands.admin.reload"
+- **/challenges reset [player]**: Reset all challenge progress for a specific player.
+    - Permission: "challenges.commands.admin.restart"
+- **/challenges resetall**: Reset all challenge progress for all players.
+    - Permission: "challenges.commands.admin.restartall"
+- **/challenges migrate**: Create a player-data-pools.yml file based on your current player-data.yml file to allow for data migration from the legacy mode to slot-pool mode.
+    - Permission: "challenges.commands.admin.migrate"
 
 ## **Creating a New Challenge**
 
@@ -94,7 +100,9 @@ This section explains how to set up and customize the **Daily Challenges** gui f
 
     - **`display-name`**: Text shown in challenge completion/expiration/refresh messages. Default to the challenge name/id if missing.
     - **`needs-selection`**: If `true`, the player must manually start the challenge by clicking the itemstack.
-    - **`time-limit`**: Duration for the challenge, formatted as `30d24h60m60s` (days, hours, minutes, seconds).
+    - **`time-limit`**: Duration for the challenge, formatted as `30d24h60m60s` (days, hours, minutes, seconds - as a string).
+    - **`repeatable`**: Cooldown time for a challenge, formatted as `30d24h60m60s` (days, hours, minutes, seconds - but not as a string).
+    - **`challenge-slot`**: The slot (in slot-pool mode) for the challenge (1, 2, 3, etc. - must be > 0). Challenges sharing a slot value will alternate randomly when reselecting a challenge on cooldown timer being over.
     - **`description`**: Text shown in the GUI and completion messages.
 
 3. **Display Item**
@@ -144,9 +152,9 @@ gui:
     - "B # # # # # # # #"
     - "# . . . . . . . #"
     - "# . . . . . . . #"
-    - "# . . . . . . . #"
-    - "# . . . . . . . #"
+    - "# # . . . . . # #"
     - "< # # # # # # # >"
+
   ingredients:
     '#':
       material: BLACK_STAINED_GLASS_PANE
@@ -166,48 +174,49 @@ gui:
         - "&7Click me to go to the previous page."
     '>':
       material: ARROW
-      name: "&l&eNext"
       next-page: true
+      name: "&l&eNext"
       lore:
         - "&7Click me to go to the next page."
-  challenge-list:
-    max-challenges-per-player: 1
-    challenges:
-      "Catching Challenge":
-        display-name: "Catching Pokémon Challenge"
-        needs-selection: true
-        time-limit: "24h"
-        description:
-          - "&7Travel the world and catch 10 Pokémon for research!"
+
+challenge-list:
+  max-challenges-per-player: 1
+
+  challenges:
+    "CatchPokemonExample-Any":
+      display-name: "Catch Any Pokémon"
+      repeatable: 20h
+      time-limit: "24h"
+      needs-selection: true
+      challenge-slot: 1
+      description:
+        - "&7Catch 1 Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:master_ball
+        name: "&e&lCatch 1 Pokémon"
+        lore:
+          - "{progression_status}"
           - " "
-          - "    &dRewards:"
-          - "    &d- &7+2500$"
-          - "    &d- &716 Ultra Balls"
-        display-item:
-          material: cobblemon:master_ball
-          name: "&e&lCatch 10 Pokémon"
-          lore:
-            - "{progression_status}"
-            - " "
-            - "{description}"
-            - " "
-            - "{tracking-tag}"
-        requirements:
-          1:
-            Catch_Pokemon:
-              pokename: any
-              shiny: false
-              type: any
-              ball: any
-              amount: 10
-              time_of_day: any
-              is_legendary: false
-              is_ultra_beast: false
-              is_mythical: false
-        rewards:
-          commands:
-            - "give {player} cobblemon:ultra_ball 16"
-            - "eco give {player} 2500"
-
-
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          Catch_Pokemon:
+            pokename: any
+            shiny: false
+            type: any
+            ball: any
+            amount: 1
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+          
 ---

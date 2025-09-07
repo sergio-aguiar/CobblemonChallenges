@@ -255,10 +255,17 @@ public class PlayerProfile {
     }
 
     public void addActiveChallenge(ChallengeProgress cp) {
-        List<ChallengeProgress> progressInList = this.activeChallenges.computeIfAbsent(cp.getParentList().getName(), (key) -> new ArrayList<>());
-        // only add if they dont have it already
-        if (progressInList.stream().noneMatch(it -> it.getActiveChallenge().getName().equalsIgnoreCase(cp.getActiveChallenge().getName())))
-            progressInList.add(cp);
+        if (api.getConfigOptions().isUsingPools()) {
+            Map<Integer, ChallengeProgress> progressInSlots = this.activeSlotChallenges.computeIfAbsent(cp.getParentList().getName(), (key) -> new LinkedHashMap<>());
+            // only add if they dont have it already
+            if (progressInSlots.values().stream().noneMatch(it -> it.getActiveChallenge().getName().equalsIgnoreCase(cp.getActiveChallenge().getName())))
+                progressInSlots.put(cp.getActiveChallenge().getSlot(), cp);
+        } else {
+            List<ChallengeProgress> progressInList = this.activeChallenges.computeIfAbsent(cp.getParentList().getName(), (key) -> new ArrayList<>());
+            // only add if they dont have it already
+            if (progressInList.stream().noneMatch(it -> it.getActiveChallenge().getName().equalsIgnoreCase(cp.getActiveChallenge().getName())))
+                progressInList.add(cp);
+        }
 
         handleOverflowingActiveChallenges();
     }
@@ -525,7 +532,16 @@ public class PlayerProfile {
             .put(slot, challenge);
 
         if (!challenge.doesNeedSelection()) {
-            addActiveChallenge(api.getChallengeList(listName), challenge, challenge.getSlot());
+            ChallengeProgress loaded = getProgressForSlot(listName, slot);
+            if (loaded != null) {
+                if (getActiveChallengeProgress(loaded.getActiveChallenge().getName()) == null) {
+                    addActiveChallenge(loaded);
+                }
+            } else {
+                if (!isChallengeInProgress(challenge.getName())) {
+                    addActiveChallenge(api.getChallengeList(listName), challenge, challenge.getSlot());
+                }
+            }
         }
 
         if (windowGUIMap == null) return;

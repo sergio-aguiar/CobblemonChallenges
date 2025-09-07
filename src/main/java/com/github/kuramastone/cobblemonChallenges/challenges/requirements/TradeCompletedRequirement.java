@@ -1,6 +1,6 @@
 package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 
-import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.TradeEvent;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
@@ -57,7 +57,7 @@ public class TradeCompletedRequirement implements Requirement {
     }
 
     // Static nested Progression class
-    public static class TradesCompletedProgression implements Progression<TradeCompletedEvent> {
+    public static class TradesCompletedProgression implements Progression<TradeEvent.Post> {
 
         private PlayerProfile profile;
         private TradeCompletedRequirement requirement;
@@ -70,8 +70,8 @@ public class TradeCompletedRequirement implements Requirement {
         }
 
         @Override
-        public Class<TradeCompletedEvent> getType() {
-            return TradeCompletedEvent.class;
+        public Class<TradeEvent.Post> getType() {
+            return TradeEvent.Post.class;
         }
 
         @Override
@@ -89,7 +89,7 @@ public class TradeCompletedRequirement implements Requirement {
         }
 
         @Override
-        public boolean meetsCriteria(TradeCompletedEvent event) {
+        public boolean meetsCriteria(TradeEvent.Post event) {
 
             Pokemon pokemon = event.getTradeParticipant1Pokemon();
             String pokename = pokemon.getSpecies().getName();

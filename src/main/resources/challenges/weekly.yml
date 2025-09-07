@@ -1,12 +1,16 @@
 gui:
+  # This is the title at the top of the gui.
   window-name: "&l&eWeekly Challenges"
+  # This is the structure. Each row must have 9 characters (ignoring spaces), and it cannot be more than 6 rows in length.
+  # '.' is a blank character that represents the contents of a list.
   structure:
     - "B # # # # # # # #"
     - "# . . . . . . . #"
     - "# . . . . . . . #"
     - "# . . . . . . . #"
-    - "# . . . . . . . #"
     - "< # # # # # # # >"
+
+  # Each character, besides spaces, has an attached itemstack. Define the itemstack here.
   ingredients:
     '#':
       material: BLACK_STAINED_GLASS_PANE
@@ -16,8 +20,8 @@ gui:
       name: "&l&eBack to Main Page"
       lore:
         - "&7Click me to go back to the challenge menu!"
-      commands:
-        - "execute as {player} run challenges" # this will return them to the base menu
+      commands: #Commands executed on click.
+        - "execute as {player} run challenges" # this will return them to the base menu.
     '<':
       material: ARROW
       name: "&l&ePrevious"
@@ -30,110 +34,61 @@ gui:
       name: "&l&eNext"
       lore:
         - "&7Click me to go to the next page."
-challenge-list:
-  max-challenges-per-player: 1
-  challenges:
-    "Legendary Battle Challenge":
-      needs-selection: true
-      time-limit: "7d"
-      description:
-        - "&7Defeat a Legendary Pokémon in battle!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &75 Master Ball"
-        - "    &d- &7+5000$"
-      display-item:
-        material: NETHER_STAR
-        name: "&e&lDefeat a Legendary Pokémon"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-          - " "
-          - "{tracking-tag}"
-      requirements:
-        1:
-          Defeat_Battler:
-            pokename: any
-            type: any/any
-            amount: 1
-            shiny: false
-            is_legendary: true
-            is_ultra_beast: false
-            is_mythical: false
-            effectiveness: any
-            npc-player-gymleader-wild: wild
-      rewards:
-        commands:
-          - "give {player} cobblemon:master_ball 1"
-          - "eco give {player} 5000"
 
-    "Reach Level 100":
+# These are the challenges found inside this gui.
+challenge-list:
+  # How many challenges a player can attempt at the same time. Does not include challenges that dont require selection.
+  max-challenges-per-player: 1
+
+  # The list of challenges. Just fill it based on examples from daily.yml.
+  challenges:
+    "CatchPokemonExample-Any7":
+      # The challenge name to be used for challenge expiration/completion/refresh/randomization messages. If missing, the default name/id will be used by default.
+      display-name: "Catch Any 7 Pokémon"
+      # Time it takes for a challenge to refresh. If using pool-mode and a slot has multiple challenges, one of the same slot will be picked at random to replace the last completed one upon refresh timer trigger.
+      repeatable: 7d
+      # Time the player has to complete the challenge since accepting it. If the timer runs out, progress will be lost for the challenge and it will reset to not being accepted.
+      time-limit: "7d" # Give them a full month to complete.
+      # If set to false, this challenge does not need to be clicked in order to be started.
       needs-selection: true
-      time-limit: "48h"
+      # This is used to define a challenge's slot. Start defining slots from 1 and go up from there. Challenges using the same slot value will in the same pool to choose from when refreshing a slot with a new challenge.
+      challenge-slot: 1
+      # This is used inside the item's lore and in the message sent when a challenge is completed.
       description:
-        - "&7Level up a Pokémon to level 100!"
+        - "&7Catch 7 Pokémon and receive these rewards!"
         - " "
         - "    &dRewards:"
-        - "    &d- &75 Rare Candies"
-        - "    &d- &7500$"
+        - "    &d- &7+700$"
+      # This is the itemstack that displays in the gui.
       display-item:
-        material: DIAMOND_SWORD
-        name: "&e&lReach Level 100"
+        # supports modded items and vanilla items. for modded items, include their initial tag such as "cobblemon:master_ball".
+        material: cobblemon:master_ball
+        name: "&e&lCatch 7 Pokémon"
+        # {progression_status} can be customized in config.yml under Messages.
+        # {description} is the same as shown above.
+        # {tracking-tag} is the countdown timer for both the challenge expiration and refresh timers.
         lore:
           - "{progression_status}"
           - " "
           - "{description}"
           - " "
           - "{tracking-tag}"
+      # Each challenge can have multiple challenge requirements. List each one under a different number which is used to sort them, so their exact value doesnt actually matter.
+      # See config.yml for more information about each challenge requirement.
       requirements:
         1:
-          level_up_to:
-            target level: 100
+          Catch_Pokemon:
             pokename: any
             shiny: false
             type: any
             ball: any
-            amount: 1
+            amount: 7
             time_of_day: any
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
+      # These commands will be sent when all requirements have been completed.
+      # {player} will be replaced with their username.
       rewards:
         commands:
-          - "give {player} cobblemon:rare_candy 5"
-          - "eco give {player} 500"
-    "Hatch an Egg":
-      needs-selection: true
-      time-limit: "24h"
-      description:
-        - "&7Hatch a Pokémon egg!"
-        - " "
-        - "    &dRewards:"
-        - "    &d- &72 Rare Candies"
-        - "    &d- &7150$"
-      display-item:
-        material: EGG
-        name: "&e&lHatch an Egg"
-        lore:
-          - "{progression_status}"
-          - " "
-          - "{description}"
-          - " "
-          - "{tracking-tag}"
-      requirements:
-        1:
-          hatch_egg:
-            pokename: any
-            shiny: false
-            type: any
-            ball: any
-            amount: 1
-            time_of_day: any
-            is_legendary: false
-            is_ultra_beast: false
-            is_mythical: false
-      rewards:
-        commands:
-          - "give {player} cobblemon:rare_candy 2"
-          - "eco give {player} 150"
+          - "eco give {player} 700"

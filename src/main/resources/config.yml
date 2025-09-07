@@ -1,11 +1,11 @@
 config-version: 1
 
 # Set this value to false to use the old system (explicitly loading every configured challenge); set to true to use the new pool system (pick random challenge on a per-slot basis)
-usePools: false
+usePools: true
 
 # These are customizable messages that appear in chat and sometimes inside of guis.
 Messages:
-  prefix: "&e&lCobblemon &f&lChallenges &8>>>&r"
+  prefix: "&6Challenges: "
   issues:
     unknown_challenge_list: "{prefix} &cUnknown challenge &e{challenge_list}&c."
   progression:
@@ -14,217 +14,99 @@ Messages:
     opening-base-gui: "{prefix} &7Complete and claim rewards from challenges here!"
     reload: "{prefix} &2Messages and guis have been reloaded!"
     restart: "{prefix} &2This player has had their challenge history reset!"
+    restartall: "{prefix} &2All players have had their challenge history reset!"
+    migrate: "{prefix} &2Legacy mode data has been migrated to pool-mode based on the currently loaded challenge data!"
   requirements:
     # When listing a player's progress on a challenge, these will be the prefix for that
     progression-shorthand:
       catch_pokemon: "{pokename} Captured"
       evolve_pokemon: "{pokename} Evolved"
-      defeat_battler: "{battlerData} Battles Won"
+      defeat_battler: "{battlerData} Defeated"
       harvest_apricorn: "Apricorns Harvested"
       harvest_berry: "Berries Harvested"
       mine_block: "{blockData} Blocks Mined"
       place_block: "{blockData} Blocks Placed"
       complete_challenge: "Challenges Completed"
-      pokemon_scanned: "Pokemon Scanned"
-      pokemon_seen: "Pokemon Seen"
-      milestone_time_played: "Time Played"
+      pokemon_scanned: "Pokémon Scanned"
+      pokemon_seen: "Pokémon Seen"
+      milestone_time_played: "Seconds Passed"
       use_rare_candy: "Rare Candies Used"
       hatch_egg: "Eggs Hatched"
       exp_gained: "EXP Gained"
       level_up_once: "Levels Gained"
-      level_up_to: "Pokemon Leveled"
+      level_up_to: "Pokémon Leveled"
       trades_completed: "Trades"
       fossils_revived: "Fossils Revived"
       login: "Login"
   challenges:
-    progression-string: "&f{current} &7/ {target}"
+    progression-string: "&f{current}&7/{target}"
     completed:
-      - "<center>&e[Challenge Completed]"
-      - "<center>&6&l{challenge}"
-      - "                                 "
-      - "{challenge-description}"
+      - "&6Challenges: &bChallenge Completed: {challenge}"
     offcooldown:
-      - "<center>&e[Challenge Refreshed]"
-      - "<center>&6&l{challenge}"
-      - "                                 "
-      - "{challenge-description}"
+      - "&6Challenges: &bChallenge Refreshed: {challenge}"
     expired:
-      - "<center>&e[Challenge Expired]"
-      - "<center>&6&l{challenge}"
-      - "                                 "
-      - "{challenge-description}"
+      - "&6Challenges: &bChallenge Expired: {challenge}"
+    randomized:
+      - "&6Challenges: &bChallenge Available: {challenge}"
     progression_status:
-      before-attempt: "&eCan be attempted"
-      during-attempt: "&2Currently in progress"
-      post-completion: "&2Already completed"
+      before-attempt: "&6Status: &ePending (Click to track)"
+      during-attempt: "&6Status: &aIn progress"
+      post-completion: "&6Status: &2Completed"
     failure:
-      time-ran-out: "{prefix} &cDaily Quest &6{challenge} &cfailed! You may attempt this challenge again, however any progress made previously has been reset."
+      time-ran-out: "{prefix} &cChallenge: &6{challenge} &cfailed!"
     tracking-tag:
       before-starting:
-        - "<center>&6&lCLICK TO TRACK"
-        - "<center>&e&l{time-remaining}"
+        - "&eChallenge time: &7{time-remaining}"
       after-starting:
-        - "<center>&6&lTRACKING"
-        - "<center>&e&l{time-remaining}"
+        - "&eTime remaining: &7{time-remaining}"
       cooldown:
-        - "<center>&c&lON COOLDOWN"
-        - "<center>&e&lAvailable again in: {time-remaining}"
+        - "&eAvailable again in: {time-remaining}"
 
 # This is the menu where each challenge list is displayed.
 # Here you can move the lists and add new ones.
 base-menu:
-  window-name: "&l&eChallenges"
+  window-name: "&6Challenges"
   structure:
     - "# # # # # # # # #"
-    - "# - 1 - 2 - 3 - #"
+    - "# 1 2 3 - # 4 - #"
+    - "# # # # # # # # #"
+    - "# - - - - - - - #"
     - "# # # # # # # # #"
   ingredients:
     '#':
       material: BLACK_STAINED_GLASS_PANE
       name: " "
     '1':
-      linked_to: "daily" # Which gui it is referencing
+      linked_to: "daily" # Which gui it is referencing.
       material: BOOK
-      name: "&l&6Daily Challenges"
+      name: "&6Daily Challenges"
       lore:
-        - "&7Left click me to see a list of Daily Challenges"
+        - "&7Click me to see a list of Daily Challenges"
     '2':
-      linked_to: "weekly" # Which gui it is referencing
+      linked_to: "weekly" # Which gui it is referencing.
       material: BOOK
+      name: "&6Weekly Challenges"
+      lore:
+        - "&7Click me to see a list of Weekly Challenges"
+    '3':
+      linked_to: "monthly" # Which gui it is referencing.
+      material: BOOK
+      name: "&6Monthly Challenges"
+      lore:
+        - "&7Click me to see a list of Monthly Challenges"
+    '4':
+      linked_to: "seasonal" # Which gui it is referencing.
+      material: ENCHANTED_BOOK
       enchanted-effect: true
       hiddenTooltips: ALL
-      name: "&l&bWeekly Challenges"
+      name: "&Seasonal Challenges"
       lore:
-        - "&7Left click me to see a list of Weekly Challenges"
-    '3':
-      linked_to: "monthly" # Which gui it is referencing
-      material: ENCHANTED_BOOK
-      name: "&l&2Monthly Challenges"
-      lore:
-        - "&7Left click me to see a list of Monthly Challenges"
+        - "&7Click me to see a list of Seasonal Challenges"
 
 # This is what the challenge items should default to after being started or completed.
 # Only the material will change currently, so their custom lore and name will persist.
 challenges:
-  active-challenge-item: # Will only replace material of the challenge, not title or lore
-    material: CLOCK
-  completed-challenge-item: # Will only replace material of the challenge, not title or lore
+  active-challenge-item: # Will only replace material of the challenge, not title or lore.
+    material: COMPASS
+  completed-challenge-item: # Will only replace material of the challenge, not title or lore.
     material: END_CRYSTAL
-
-# These are examples that will not be loaded. Use this as a reference for what options are available
-# pokename/any: Can be a specific Pokémon name or any. Can include multiple options such as "bulbasaur/ivysaur/venusaur"
-# type/any: Specifies types (e.g., Fire, Water) or any.
-# ball/any: Can specify a type of Poké Ball or any.
-# amount: Represents the number of times an action should occur.
-# time_of_day: Required time to perform this event (morning, day, night).
-# is_legendary/is_ultra_beast/is_mythical: Boolean values for catching legendary, ultra beast or mythical pokémon.
-# opponent_type: Specifies whether the opponent is wild, trainer, player, or a gym leader.
-# effectiveness: Describes effectiveness in battle (super-effective, normal, not-very-effective).
-# action: Can be mined, placed, craft, find, sell, buy, etc.
-triggers:
-  Catch_Pokemon: # Catch anything
-    pokename: any/charizard/bulbasaur/mewtwo
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-  complete_challenge:
-    amount: 1
-    challenge-list: any # This is the challenge list it must come from
-  Defeat_Battler: # Win a battle with these conditions
-    pokename: any
-    type: any/any
-    amount: 1
-    shiny: false
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-    effectiveness: any/1.0/0.5/2.0
-    npc-player-gymleader-wild: any
-  Evolve_Pokemon: # Evolve any pokemon
-    pokename: any
-    amount: 1
-    shiny: false
-    type: any
-    ball: any
-    time_of_day: any
-  mine_block: # When a block is broken
-    type: any/stone
-    amount: 5
-  place_block: #When a block is placed
-    type: any/stone
-    amount: 5
-
-  harvest_apricorn: # Harvest an apricorn
-    type: any
-    amount: 1
-  harvest_berry: # Harvest a berry
-    type: any
-    amount: 1
-  milestone_time_played: #Playtime tracker. Counts upwards in 30 second increments
-    total-seconds: 60
-  use_rare_candy:
-    pokename: any
-    amount: 1
-  pokemon_seen: # When a player has fought this pokemon in battle
-    amount: 100
-    pokename: any
-  pokemon_scanned: # This is when a player uses a pokedex to scan a pokemon
-    amount: 100
-    pokename: any
-
-  level_up_once: # When increasing their level by one, at all
-    pokename: any
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-  level_up_to: # When their level reaches a certain value
-    target level: 100
-    pokename: any
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-  hatch_egg: # When an egg has finished hatching
-    pokename: any
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-  trades_completed: # When the trade is completed. This is for the pokemon they sent themselves, not received.
-    pokename: any
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false
-  exp_gained: # When exp is gained by a pokemon
-    pokename: any
-    shiny: false
-    type: any
-    ball: any
-    amount: 1
-    time_of_day: any
-    is_legendary: false
-    is_ultra_beast: false
-    is_mythical: false

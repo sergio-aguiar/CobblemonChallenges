@@ -24,6 +24,7 @@ public class ConfigOptions {
     private ItemConfig completedChallengeItem;
 
     private boolean usePools = false;
+    private boolean rerollOnExpire = false;
 
     private GuiConfig menuConfig; // base challenge menu
     private Map<String, GuiConfig> challengeConfigs; // config per challenge
@@ -38,6 +39,7 @@ public class ConfigOptions {
 
         YamlConfig.loadFromYaml(this, config);
         usePools = config.getBoolean("usePools");
+        rerollOnExpire = config.getBoolean("rerollOnExpire");
         menuConfig = GuiConfig.load(config.getSection("base-menu"));
         loadMessages(config);
         loadGuiConfigPerChallenge();
@@ -114,5 +116,9 @@ public class ConfigOptions {
 
     public boolean isUsingPools() {
         return usePools;
+    }
+
+    public boolean isRerollingOnExpiration() {
+        return rerollOnExpire;
     }
 }

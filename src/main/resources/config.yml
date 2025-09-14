@@ -3,6 +3,9 @@ config-version: 1
 # Set this value to false to use the old system (explicitly loading every configured challenge); set to true to use the new pool system (pick random challenge on a per-slot basis)
 usePools: true
 
+# Set this value to true to make it so that, when an active challenge expires, it gets randomized into a same one from that slot (if usePools is set to true).
+rerollOnExpire: false
+
 # These are customizable messages that appear in chat and sometimes inside of guis.
 Messages:
   prefix: "&6Challenges: "

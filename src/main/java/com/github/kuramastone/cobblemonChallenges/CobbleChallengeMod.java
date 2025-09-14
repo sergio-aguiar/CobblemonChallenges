@@ -219,12 +219,6 @@ public class CobbleChallengeMod implements ModInitializer {
                                     for (ExpiredSlot ex : expiredSlots) {
                                         profile.removeProgressForSlot(ex.listName, ex.slot);
 
-                                        Challenge ch = ex.cp.getActiveChallenge();
-
-                                        if (!ch.doesNeedSelection()) {
-                                            profile.addActiveChallenge(ex.cp.getParentList(), ch, ch.getSlot());
-                                        }
-
                                         CobbleChallengeMod.logger.info("Resetting expired slot {} challenge {} for player {} in list {}",
                                                 ex.slot, ex.cp.getActiveChallenge().getName(), profile.getUUID(), ex.listName);
 
@@ -238,6 +232,37 @@ public class CobbleChallengeMod implements ModInitializer {
                                         List<String> formatted = StringUtils.centerStringListTags(lines);
                                         for (String line : formatted) {
                                             profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                        }
+
+                                        Challenge ch = ex.cp.getActiveChallenge();
+                                        if (api.getConfigOptions().isRerollingOnExpiration()) {
+                                            int slot = ch.getSlot();
+                                            ChallengeList cl = api.getChallengeList(ex.listName);
+                                            Challenge replacement = cl.getRandomChallengeForSlot(slot, new java.util.Random());
+
+                                            if (replacement != null) {
+                                                profile.setAvailableSlotChallenge(ex.listName, slot, replacement);
+
+                                                if (!replacement.doesNeedSelection()) {
+                                                    profile.addActiveChallenge(cl, replacement, replacement.getSlot());
+                                                }
+
+                                                List<String> randomizedLines = List.of(StringUtils.splitByLineBreak(
+                                                        api.getMessage(
+                                                                "challenges.randomized",
+                                                                "{challenge}", replacement.getDisplayName(),
+                                                                "{challenge-description}", replacement.getDescription()
+                                                        ).getText()
+                                                ));
+                                                List<String> randomizeformatted = StringUtils.centerStringListTags(randomizedLines);
+                                                for (String line : randomizeformatted) {
+                                                    profile.sendMessage(ComponentEditor.decorateComponent(line));
+                                                }
+                                            }
+                                        } else {
+                                            if (!ch.doesNeedSelection()) {
+                                                profile.addActiveChallenge(ex.cp.getParentList(), ch, ch.getSlot());
+                                            }
                                         }
                                     }
                                 });

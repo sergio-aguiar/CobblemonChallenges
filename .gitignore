@@ -1,0 +1,46 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+
+# Gradle
+.gradle/
+build/
+bin/
+out/
+gradle-app.setting
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.ipr
+*.iml
+*.hprof
+
+# Eclipse
+.metadata/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.localhistory/
+
+# VSCode
+.vscode/
+
+# Fabric / Minecraft
+runs/
+*.lock
+*.zip
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Generated / temporary files
+logs/
+*.cache
+*.tmp

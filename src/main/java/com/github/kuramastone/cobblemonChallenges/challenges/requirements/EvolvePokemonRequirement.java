@@ -7,6 +7,7 @@ import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.utils.CobblemonUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
 import java.util.List;
@@ -105,12 +106,11 @@ public class EvolvePokemonRequirement implements Requirement {
                 return false;
             }
 
-            if (types.stream().noneMatch(it -> StringUtils.doesStringContainCategory(requirement.type.split("/"), it.getName()))) {
+            if (types.stream().noneMatch(pokeType -> StringUtils.doesStringContainCategory(requirement.type.split("/"), pokeType.getName()))) {
                 return false;
             }
 
-            if (!requirement.time_of_day.toLowerCase().startsWith("any") &&
-                    doesDaytimeMatch(time_of_day, requirement.time_of_day)) {
+            if (!CobblemonUtils.doesDaytimeMatch(time_of_day, requirement.time_of_day)) {
                 return false;
             }
 
@@ -137,29 +137,5 @@ public class EvolvePokemonRequirement implements Requirement {
         public void writeTo(YamlConfig configurationSection) {
             configurationSection.set("progressAmount", progressAmount);
         }
-    }
-
-    private static boolean doesDaytimeMatch(long time, String phrase) {
-        long normalizedTime = time % 24000;
-
-        // Convert the phrase to lowercase to handle case-insensitive comparison
-        phrase = phrase.toLowerCase();
-
-        switch (phrase) {
-            case "any":
-                return true;  // If 'any', always return true
-            case "dawn":
-                return normalizedTime >= 0 && normalizedTime < 1000;
-            case "day":
-                return normalizedTime >= 1000 && normalizedTime < 12000;
-            case "dusk":
-                return normalizedTime >= 12000 && normalizedTime < 13000;
-            case "night":
-                return normalizedTime >= 13000 && normalizedTime < 24000;
-            default:
-                // If the phrase doesn't match any expected value, return true anyways to be safe.
-                return true;
-        }
-
     }
 }

@@ -7,7 +7,7 @@ import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
-import com.github.kuramastone.cobblemonChallenges.utils.PixelmonUtils;
+import com.github.kuramastone.cobblemonChallenges.utils.CobblemonUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
 import java.util.List;
@@ -109,18 +109,16 @@ public class HatchEggRequirement implements Requirement {
                 return false;
             }
 
-            if (!requirement.type.toLowerCase().startsWith("any") &&
-                    types.stream().map(ElementalType::getName).noneMatch(requirement.type::equalsIgnoreCase)) {
+            if (types.stream().noneMatch(pokeType -> StringUtils.doesStringContainCategory(requirement.type.split("/"), pokeType.getName()))) {
                 return false;
             }
 
-            if (!requirement.ball.toLowerCase().startsWith("any") &&
+            if (!requirement.ball.toLowerCase().contains("any") &&
                     !ballName.toLowerCase().contains(requirement.ball.toLowerCase())) {
                 return false;
             }
 
-            if (!requirement.time_of_day.toLowerCase().startsWith("any") &&
-                    !PixelmonUtils.doesDaytimeMatch(time_of_day, requirement.time_of_day)) {
+            if (!CobblemonUtils.doesDaytimeMatch(time_of_day, requirement.time_of_day)) {
                 return false;
             }
 

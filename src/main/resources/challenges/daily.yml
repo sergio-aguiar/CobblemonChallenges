@@ -140,6 +140,78 @@ challenge-list:
         commands:
           - "eco give {player} 100"
 
+    "CatchPokemonExample-WaterOrIce":
+      display-name: "Catch a Water or Ice Pokémon"
+      repeatable: 20h
+      time-limit: "24h"
+      needs-selection: true
+      challenge-slot: 1
+      description:
+        - "&7Catch 1 Water or 1 Ice type Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:dive_ball
+        name: "&e&lCatch 1 Water or 1 Ice Pokémon"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          Catch_Pokemon:
+            pokename: any
+            shiny: false
+            type: water/ice
+            ball: any
+            amount: 1
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "CatchPokemonExample-MasterBall":
+      display-name: "Catch a Pokémon in a Master Ball"
+      repeatable: 20h
+      time-limit: "24h"
+      needs-selection: true
+      challenge-slot: 1
+      description:
+        - "&7Catch 1 Pokémon in a Master Ball and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:master_ball
+        name: "&e&lCatch 1 Pokémon in a Master Ball"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          Catch_Pokemon:
+            pokename: any
+            shiny: false
+            type: any
+            ball: cobblemon:master_ball
+            amount: 1
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
     "CompleteChallengeExample-Any":
       display-name: "Complete a Challenge"
       repeatable: 20h
@@ -264,6 +336,41 @@ challenge-list:
             is_legendary: true
             is_ultra_beast: false
             is_mythical: true
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "DefeatPokemonExample-Night":
+      display-name: "Defeat a Pokémon at Night"
+      repeatable: 20h
+      time-limit: "24h"
+      needs-selection: true
+      challenge-slot: 3
+      description:
+        - "&7Defeat 1 Pokémon at Night and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:muscle_band
+        name: "&e&lDefeat 1 Pokémon at Night"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          defeat_battler:
+            pokename: any
+            shiny: false
+            type: any
+            amount: 1
+            time_of_day: night
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
       rewards:
         commands:
           - "eco give {player} 100"

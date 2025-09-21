@@ -12,6 +12,7 @@ import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.PermissionUtils;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -45,29 +46,45 @@ public class CommandHandler {
         api = CobbleChallengeMod.instance.getAPI();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(Commands.literal("challenges")
-                    .requires(source -> hasPermission(source, "challenges.commands.challenge"))
+            LiteralArgumentBuilder<CommandSourceStack> challenges = Commands.literal("challenges")
+                .requires(source -> hasPermission(source, "challenges.commands.challenge"))
+                .executes(CommandHandler::handleChallengeBaseCommand);
+
+            challenges.then(
+                Commands.literal("list")
                     .executes(CommandHandler::handleChallengeBaseCommand)
                     .then(Commands.argument("list", StringArgumentType.word())
-                            .suggests(CommandHandler::handleListSuggestions)
-                            .executes(CommandHandler::handleChallengeListCommand)
-                    )
-                    //.then(Commands.literal("reload")
-                    //        .requires(source -> hasPermission(source, "challenges.commands.admin.reload"))
-                    //        .executes(CommandHandler::handleReloadCommand))
-                    .then(Commands.literal("reset")
-                            .requires(source -> hasPermission(source, "challenges.commands.admin.restart"))
-                            .then(Commands.argument("player", EntityArgument.player())
-                                    .executes(CommandHandler::handleRestartCommand)))
-                    .then(Commands.literal("migrate")
-                            .requires(source -> hasPermission(source, "challenges.commands.admin.migrate"))
-                            .executes(CommandHandler::handleMigrateLegacyCommand))
-                    .then(Commands.literal("resetall")
-                            .requires(source -> hasPermission(source, "challenges.commands.admin.restartall"))
-                            .executes(CommandHandler::handleRestartAllCommand))
+                        .suggests(CommandHandler::handleListSuggestions)
+                        .executes(CommandHandler::handleChallengeListCommand))
             );
-        });
 
+            /* challenges.then(
+                Commands.literal("reload")
+                    .requires(source -> hasPermission(source, "challenges.commands.admin.reload"))
+                    .executes(CommandHandler::handleReloadCommand)
+            ); */
+
+            challenges.then(
+                Commands.literal("reset")
+                    .requires(source -> hasPermission(source, "challenges.commands.admin.restart"))
+                    .then(Commands.argument("player", EntityArgument.player())
+                        .executes(CommandHandler::handleRestartCommand))
+            );
+
+            challenges.then(
+                Commands.literal("migrate")
+                    .requires(source -> hasPermission(source, "challenges.commands.admin.migrate"))
+                    .executes(CommandHandler::handleMigrateLegacyCommand)
+            );
+
+            challenges.then(
+                Commands.literal("resetall")
+                    .requires(source -> hasPermission(source, "challenges.commands.admin.restartall"))
+                    .executes(CommandHandler::handleRestartAllCommand)
+            );
+
+            dispatcher.register(challenges);
+        });
     }
 
     private static int handleRestartCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

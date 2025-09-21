@@ -8,7 +8,7 @@ Compatible with LuckPerms permissions!
 ## **Commands**
 - **/challenges**: Open the challenge menu gui where players can select a category such as Daily, Weekly, Monthly, or any custom challenge.
     - Permission: "challenges.commands.challenge"
-- **/challenges [type]**: Open the challenge list directly without needing the menu.
+- **/challenges list [type]**: Open the challenge list directly without needing the menu.
     - Permission: "challenges.commands.challenge"
 - **/challenges reload**: Reload all challenges and guis! **CURRENTLY DISABLED**
     - Permission: "challenges.commands.admin.reload"

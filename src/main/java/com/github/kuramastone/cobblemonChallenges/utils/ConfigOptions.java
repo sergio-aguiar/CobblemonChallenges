@@ -38,8 +38,19 @@ public class ConfigOptions {
                 "config.yml", getClass());
 
         YamlConfig.loadFromYaml(this, config);
-        usePools = config.getBoolean("usePools");
-        rerollOnExpire = config.getBoolean("rerollOnExpire");
+
+        try {
+            usePools = config.getBoolean("usePools");
+        } catch (RuntimeException e) {
+            usePools = false;
+        }
+        
+        try {
+            rerollOnExpire = config.getBoolean("rerollOnExpire");
+        } catch (RuntimeException e) {
+            rerollOnExpire = false;
+        }
+        
         menuConfig = GuiConfig.load(config.getSection("base-menu"));
         loadMessages(config);
         loadGuiConfigPerChallenge();

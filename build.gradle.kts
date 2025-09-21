@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    kotlin("jvm") version "2.1.20"
+    id("fabric-loom") version "1.9-SNAPSHOT"
     id("maven-publish")
     id("com.gradleup.shadow") version "9.0.0-beta4"
 }
@@ -92,7 +92,7 @@ dependencies {
     includeAndImplement("net.kyori:adventure-key:4.17.0")
     includeAndImplement("net.kyori:adventure-text-serializer-plain:4.14.0")
 
-    modImplementation("com.cobblemon:fabric:1.7.0+1.21.1-SNAPSHOT")
+    modImplementation("com.cobblemon:fabric:1.6.1+1.21.1-SNAPSHOT")
 
     compileOnly("net.luckperms:api:5.4")
 }

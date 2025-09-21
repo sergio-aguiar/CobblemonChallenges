@@ -1,6 +1,6 @@
 package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 
-import com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedPostEvent;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
@@ -57,7 +57,7 @@ public class EXPGainedRequirement implements Requirement {
     }
 
     // Static nested Progression class
-    public static class ExpGainedProgression implements Progression<ExperienceGainedEvent.Post> {
+    public static class ExpGainedProgression implements Progression<ExperienceGainedPostEvent> {
 
         private PlayerProfile profile;
         private EXPGainedRequirement requirement;
@@ -70,8 +70,8 @@ public class EXPGainedRequirement implements Requirement {
         }
 
         @Override
-        public Class<ExperienceGainedEvent.Post> getType() {
-            return ExperienceGainedEvent.Post.class;
+        public Class<ExperienceGainedPostEvent> getType() {
+            return ExperienceGainedPostEvent.class;
         }
 
         @Override
@@ -83,14 +83,14 @@ public class EXPGainedRequirement implements Requirement {
         public void progress(Object obj) {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
-                    ExperienceGainedEvent.Post event = getType().cast(obj);
+                    ExperienceGainedPostEvent event = getType().cast(obj);
                     progressAmount += event.getExperience();
                 }
             }
         }
 
         @Override
-        public boolean meetsCriteria(ExperienceGainedEvent.Post event) {
+        public boolean meetsCriteria(ExperienceGainedPostEvent event) {
 
             Pokemon pokemon = event.getPokemon();
             String pokename = pokemon.getSpecies().getName();

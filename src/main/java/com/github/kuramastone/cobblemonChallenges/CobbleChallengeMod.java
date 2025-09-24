@@ -13,6 +13,8 @@ import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
 import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
+import com.github.kuramastone.cobblemonChallenges.utils.VoteUtils;
+import com.vexsoftware.votifier.fabric.event.VoteListener;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -371,6 +373,13 @@ public class CobbleChallengeMod implements ModInitializer {
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.HIGHEST, ChallengeListener::onLevelUp);
         CobblemonEvents.TRADE_EVENT_POST.subscribe(Priority.HIGHEST, ChallengeListener::onTradeCompleted);
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.HIGHEST, ChallengeListener::onFossilRevived);
+
+        if (VoteUtils.isVotifierLoaded()) {
+            VoteListener.EVENT.register(event -> {
+                PlayerVoteEvent voteEvent = new PlayerVoteEvent(event.getUsername(), event.getServiceName());
+                ChallengeListener.onPlayerVote(voteEvent);
+            });
+        }
     }
 
     public CobbleChallengeAPI getAPI() {

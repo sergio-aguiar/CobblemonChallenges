@@ -58,6 +58,8 @@ repositories {
     maven("https://maven.impactdev.net/repository/development/")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://maven.fabricmc.net/")
+
+    maven(url = "https://jitpack.io")
 }
 
 val fabric_version: String by project
@@ -95,6 +97,9 @@ dependencies {
     modImplementation("com.cobblemon:fabric:1.6.1+1.21.1-SNAPSHOT")
 
     compileOnly("net.luckperms:api:5.4")
+
+    implementation("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2")
+    implementation("com.github.DrexHD:NuVotifier-Fabric:1.0.0-1.20.5")
 }
 
 fun DependencyHandler.includeAndImplement(dependency: String) {

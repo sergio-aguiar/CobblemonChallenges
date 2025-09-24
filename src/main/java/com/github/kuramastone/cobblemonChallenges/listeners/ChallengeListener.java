@@ -137,4 +137,12 @@ public class ChallengeListener {
         // delay this to allow player to fully join before triggering
         TickScheduler.scheduleLater(60L, () -> passEvent(event, event.getPlayer()));
     }
+
+    public static void onPlayerVote(PlayerVoteEvent event) {
+        Player player = CobbleChallengeMod.getMinecraftServer().getPlayerList().getPlayerByName(event.getUsername());
+        if (player != null) {
+            passEvent(event, player);
+        }
+        // else, player is offline, maybe add an offline vote tracker later
+    }
 }

@@ -26,19 +26,17 @@ public class RequirementLoader {
         register(PlaceBlockRequirement.class);
         register(UseRareCandyRequirement.class);
         register(PokemonSeenRequirement.class);
-
         register(HatchEggRequirement.class);
         register(EXPGainedRequirement.class);
         register(LevelUpToRequirement.class);
         register(IncreaseLevelRequirement.class);
         register(TradeCompletedRequirement.class);
         register(FossilRevivedRequirement.class);
-
         register(LoginRequirement.class);
+        register(VoteRequirement.class);
 
         // register
         RegisterRequirementsEvent.EVENT.invoker().onRegistration();
-
     }
 
     public static void register(Class<? extends Requirement> clazz) {

@@ -77,7 +77,7 @@ challenge-list:
       # See config.yml for more information about each challenge requirement.
       requirements:
         1:
-          Catch_Pokemon:
+          catch_Pokemon:
             pokename: any
             shiny: false
             type: any

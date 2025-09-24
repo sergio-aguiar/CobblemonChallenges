@@ -41,6 +41,7 @@ Messages:
       trades_completed: "Trades"
       fossils_revived: "Fossils Revived"
       login: "Login"
+      player_vote: "Voted"
   challenges:
     progression-string: "&f{current}&7/{target}"
     completed:

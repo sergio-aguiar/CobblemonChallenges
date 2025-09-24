@@ -20,5 +20,9 @@
     "fabricloader": ">=0.16.0",
     "fabric": "*",
     "cobblemon": ">=1.6.0"
+  },
+  "suggests": {
+    "luckperms": "*",
+    "nuvotifier-fabric": "*"
   }
 }

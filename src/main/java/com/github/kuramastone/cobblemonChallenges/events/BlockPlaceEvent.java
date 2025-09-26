@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -50,9 +51,9 @@ public class BlockPlaceEvent {
         try {
             if (!level.isClientSide) {
                 ItemStack stack = player.getItemInHand(interactionHand);
-                if (!stack.isEmpty() && stack.getItem() instanceof BlockItem blockItem) {
+                if (!stack.isEmpty() && stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof Block block) {
                     BlockPos placePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    BlockState stateToPlace = blockItem.getBlock().defaultBlockState();
+                    BlockState stateToPlace = block.defaultBlockState();
 
                     ChallengeListener.onBlockPlace(
                         new BlockPlaceEvent(stateToPlace, placePos, level, player)

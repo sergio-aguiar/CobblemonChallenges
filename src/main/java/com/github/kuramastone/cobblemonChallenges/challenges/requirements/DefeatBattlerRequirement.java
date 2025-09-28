@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.battles.model.actor.AIBattleActor;
 import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.battles.model.actor.EntityBackedBattleActor;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
+import com.cobblemon.mod.common.api.pokemon.labels.CobblemonPokemonLabels;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.battles.pokemon.BattlePokemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
@@ -37,6 +38,8 @@ public class DefeatBattlerRequirement implements Requirement {
     private String ball = "any";
     @YamlKey("time_of_day")
     private String time_of_day = "any";
+    @YamlKey("is_paradox")
+    private boolean is_paradox = false;
     @YamlKey("is_legendary")
     private boolean is_legendary = false;
     @YamlKey("is_ultra_beast")
@@ -145,6 +148,7 @@ public class DefeatBattlerRequirement implements Requirement {
                 boolean shiny = pokemon.getShiny();
                 List<ElementalType> types = StreamSupport.stream(pokemon.getTypes().spliterator(), false).collect(Collectors.toUnmodifiableList());
                 long time_of_day = CobbleChallengeMod.getMinecraftServer().getPlayerList().getPlayer(player.getUuid()).level().getDayTime();
+                boolean is_paradox = pokemon.hasLabels(CobblemonPokemonLabels.PARADOX);
                 boolean is_legendary = pokemon.isLegendary();
                 boolean is_ultra_beast = pokemon.isUltraBeast();
                 boolean is_mythical = pokemon.isMythical();
@@ -165,9 +169,10 @@ public class DefeatBattlerRequirement implements Requirement {
                     continue;
                 }
 
-                boolean hasAnyRequirement = requirement.is_legendary || requirement.is_ultra_beast || requirement.is_mythical;
+                boolean hasAnyRequirement = requirement.is_paradox || requirement.is_legendary || requirement.is_ultra_beast || requirement.is_mythical;
 
                 boolean passesAny =
+                    (requirement.is_paradox && is_paradox) ||
                     (requirement.is_legendary && is_legendary) ||
                     (requirement.is_ultra_beast && is_ultra_beast) ||
                     (requirement.is_mythical && is_mythical);

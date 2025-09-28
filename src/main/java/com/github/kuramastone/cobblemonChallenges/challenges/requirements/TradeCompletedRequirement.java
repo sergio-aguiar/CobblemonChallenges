@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 
 import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
+import com.cobblemon.mod.common.api.pokemon.labels.CobblemonPokemonLabels;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
@@ -31,6 +32,8 @@ public class TradeCompletedRequirement implements Requirement {
     private String ball = "any";
     @YamlKey("time_of_day")
     private String time_of_day = "any";
+    @YamlKey("is_paradox")
+    private boolean is_paradox = false;
     @YamlKey("is_legendary")
     private boolean is_legendary = false;
     @YamlKey("is_ultra_beast")
@@ -97,6 +100,7 @@ public class TradeCompletedRequirement implements Requirement {
             List<ElementalType> types = StreamSupport.stream(pokemon.getTypes().spliterator(), false).collect(Collectors.toUnmodifiableList());
             String ballName = event.getTradeParticipant1Pokemon().getCaughtBall().getName().toString();
             long time_of_day = event.getTradeParticipant1Pokemon().getOwnerPlayer().level().getDayTime();
+            boolean is_paradox = pokemon.hasLabels(CobblemonPokemonLabels.PARADOX);
             boolean is_legendary = pokemon.isLegendary();
             boolean is_ultra_beast = pokemon.isUltraBeast();
             boolean is_mythical = pokemon.isMythical();
@@ -122,9 +126,10 @@ public class TradeCompletedRequirement implements Requirement {
                 return false;
             }
 
-            boolean hasAnyRequirement = requirement.is_legendary || requirement.is_ultra_beast || requirement.is_mythical;
+            boolean hasAnyRequirement = requirement.is_paradox || requirement.is_legendary || requirement.is_ultra_beast || requirement.is_mythical;
 
             boolean passesAny =
+                (requirement.is_paradox && is_paradox) ||
                 (requirement.is_legendary && is_legendary) ||
                 (requirement.is_ultra_beast && is_ultra_beast) ||
                 (requirement.is_mythical && is_mythical);

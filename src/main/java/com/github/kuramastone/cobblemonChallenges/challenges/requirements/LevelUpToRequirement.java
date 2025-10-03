@@ -119,8 +119,7 @@ public class LevelUpToRequirement implements Requirement {
                 return false;
             }
 
-            if (!requirement.ball.toLowerCase().contains("any") &&
-                    !ballName.toLowerCase().contains(requirement.ball.toLowerCase())) {
+            if (!StringUtils.doesStringContainCategory(requirement.ball.split("/"), ballName)) {
                 return false;
             }
 

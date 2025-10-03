@@ -10,6 +10,8 @@ Compatible with LuckPerms permissions!
     - Permission: "challenges.commands.challenge"
 - **/challenges list [type]**: Open the challenge list directly without needing the menu.
     - Permission: "challenges.commands.challenge"
+- **/challenges info**: Displays the current plugin version and maintainer.
+    - Permission: "challenges.commands.info"
 - **/challenges reload**: Reload all challenges and guis! **CURRENTLY DISABLED**
     - Permission: "challenges.commands.admin.reload"
 - **/challenges reset [player]**: Reset all challenge progress for a specific player.

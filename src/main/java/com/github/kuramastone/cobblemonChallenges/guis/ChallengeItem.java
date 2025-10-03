@@ -49,9 +49,10 @@ public class ChallengeItem implements ItemProvider {
             if (line.contains("{tracking-tag}")) {
                 List<String> tagLines = new ArrayList<>();
 
-                if (!challenge.doesNeedSelection()) {
-                    // No selection → no timer tag
-                    tagLines = List.of(); // or skip
+                long cooldown = challenge.getRepeatableEveryMilliseconds();
+
+                if (cooldown == Long.MAX_VALUE) {
+                    tagLines = List.of();
                 } else if (profile.isChallengeCompleted(challenge.getName())) {
                     // Challenge completed → check cooldown
                     long lastCompleted = profile.getCompletedChallenges().stream()
@@ -60,7 +61,6 @@ public class ChallengeItem implements ItemProvider {
                         .map(c -> c.timeCompleted())
                         .orElse(0L);
                     long elapsed = System.currentTimeMillis() - lastCompleted;
-                    long cooldown = challenge.getRepeatableEveryMilliseconds();
                     long remaining = cooldown - elapsed;
 
                     if (remaining > 0) {

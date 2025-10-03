@@ -18,6 +18,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -33,8 +34,10 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -56,6 +59,12 @@ public class CommandHandler {
                     .then(Commands.argument("list", StringArgumentType.word())
                         .suggests(CommandHandler::handleListSuggestions)
                         .executes(CommandHandler::handleChallengeListCommand))
+            );
+
+            challenges.then(
+                Commands.literal("info")
+                    .requires(source -> hasPermission(source, "challenges.commands.info"))
+                    .executes(CommandHandler::handleInfoCommand)
             );
 
             /* challenges.then(
@@ -190,6 +199,27 @@ public class CommandHandler {
             return 1;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    private static int handleInfoCommand(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+
+            String box = ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "========================" + "\n"
+                    + ChatFormatting.RESET + "" + ChatFormatting.GOLD + " Cobblemon Challenges "
+                    + ChatFormatting.GRAY + "v" + FabricLoader.getInstance().getModContainer("cobblemonchallenges").orElseThrow().getMetadata().getVersion().getFriendlyString() + "\n"
+                    + ChatFormatting.WHITE + " Fork maintained by: " + ChatFormatting.YELLOW + "pioavenger " + ChatFormatting.WHITE + "!\n"
+                    + ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "========================";
+
+            Component message = Component.literal(box);
+            source.sendSystemMessage(message);
+        } catch (NoSuchElementException e) {
+            CobbleChallengeMod.logger.error("Could not return plugin version: %s".formatted(e.getMessage()));
+            e.printStackTrace();
+            return 1;     
         }
 
         return 0;

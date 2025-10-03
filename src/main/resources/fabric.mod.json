@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "cobblemonchallenges",
-  "version": "1.0.0",
+  "version": "${version}",
   "name": "Cobblemon Challenges",
   "description": "Provide monthly, weekly, daily, or even seasonal challenges!",
   "authors": [
-    "KuramaStone"
+    "KuramaStone",
+    "pioavenger"
   ],
   "license": "MPL-2.0",
   "environment": "*",

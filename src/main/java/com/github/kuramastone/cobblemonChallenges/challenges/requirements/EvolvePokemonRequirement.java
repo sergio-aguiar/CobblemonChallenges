@@ -96,6 +96,7 @@ public class EvolvePokemonRequirement implements Requirement {
             String pokename = pokemon.getSpecies().getName();
             boolean shiny = pokemon.getShiny();
             List<ElementalType> types = StreamSupport.stream(pokemon.getTypes().spliterator(), false).collect(Collectors.toUnmodifiableList());
+            String ballName = pokemon.getCaughtBall().getName().toString();
             long time_of_day = event.getPokemon().getOwnerEntity().level().getDayTime();
 
             if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), pokename)) {
@@ -107,6 +108,10 @@ public class EvolvePokemonRequirement implements Requirement {
             }
 
             if (types.stream().noneMatch(pokeType -> StringUtils.doesStringContainCategory(requirement.type.split("/"), pokeType.getName()))) {
+                return false;
+            }
+
+            if (!StringUtils.doesStringContainCategory(requirement.ball.split("/"), ballName)) {
                 return false;
             }
 

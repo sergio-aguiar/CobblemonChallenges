@@ -144,6 +144,7 @@ public class DefeatBattlerRequirement implements Requirement {
                 String pokename = pokemon.getSpecies().getName();
                 boolean shiny = pokemon.getShiny();
                 List<ElementalType> types = StreamSupport.stream(pokemon.getTypes().spliterator(), false).collect(Collectors.toUnmodifiableList());
+                String ballName = pokemon.getCaughtBall().getName().toString();
                 long time_of_day = CobbleChallengeMod.getMinecraftServer().getPlayerList().getPlayer(player.getUuid()).level().getDayTime();
                 boolean is_legendary = pokemon.isLegendary();
                 boolean is_ultra_beast = pokemon.isUltraBeast();
@@ -158,6 +159,10 @@ public class DefeatBattlerRequirement implements Requirement {
                 }
 
                 if (types.stream().noneMatch(pokeType -> StringUtils.doesStringContainCategory(requirement.type.split("/"), pokeType.getName()))) {
+                    continue;
+                }
+
+                if (!StringUtils.doesStringContainCategory(requirement.ball.split("/"), ballName)) {
                     continue;
                 }
 

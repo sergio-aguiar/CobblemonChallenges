@@ -212,6 +212,42 @@ challenge-list:
         commands:
           - "eco give {player} 100"
 
+    "CatchPokemonExample-MasterBallOrQuickBall":
+      display-name: "Catch a Pokémon in a Master Ball or a Quick Ball"
+      repeatable: 10s
+      time-limit: "30s"
+      needs-selection: true
+      challenge-slot: 1
+      description:
+        - "&7Catch 1 Pokémon in a Master Ball or a Quick Ball and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:quick_ball
+        name: "&e&lCatch 1 Pokémon in a Master Ball or a Quick Ball"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          Catch_Pokemon:
+            pokename: any
+            shiny: false
+            type: any
+            ball: cobblemon:master_ball/cobblemon:quick_ball
+            amount: 1
+            time_of_day: any
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
     "CompleteChallengeExample-Any":
       display-name: "Complete a Challenge"
       repeatable: 20h
@@ -296,6 +332,7 @@ challenge-list:
             pokename: any
             shiny: false
             type: any
+            ball: any
             amount: 1
             time_of_day: any
             is_legendary: false
@@ -331,6 +368,7 @@ challenge-list:
             pokename: any
             shiny: false
             type: any
+            ball: any
             amount: 1
             time_of_day: any
             is_legendary: true
@@ -366,6 +404,7 @@ challenge-list:
             pokename: any
             shiny: false
             type: any
+            ball: any
             amount: 1
             time_of_day: night # You can specify multiple times, for example time_of_day: night/dusk
             is_legendary: false
@@ -401,6 +440,7 @@ challenge-list:
             pokename: any
             shiny: false
             type: any
+            ball: any
             amount: 1
             time_of_day: any
       rewards:
@@ -433,6 +473,40 @@ challenge-list:
             pokename: Charmeleon
             shiny: false
             type: any
+            ball: any
+            amount: 1
+            time_of_day: any
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "EvolvePokemonExample-MasterBall":
+      display-name: "Evolve a Pokémon caught in a Master Ball"
+      repeatable: 10s
+      time-limit: "30s"
+      needs-selection: true
+      challenge-slot: 4
+      description:
+        - "&7Evolve a Pokémon caught in a Master Ball and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:master_ball
+        name: "&e&lEvolve a Pokémon caught in a Master Ball"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          evolve_pokemon:
+            pokename: any
+            shiny: false
+            type: any
+            ball: cobblemon:master_ball
             amount: 1
             time_of_day: any
       rewards:

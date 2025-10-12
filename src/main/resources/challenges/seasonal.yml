@@ -71,6 +71,7 @@ challenge-list:
             ball: any
             amount: 5
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -107,6 +108,7 @@ challenge-list:
             type: ice
             amount: 10
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -141,6 +143,7 @@ challenge-list:
             type: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false

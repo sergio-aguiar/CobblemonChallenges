@@ -84,6 +84,7 @@ challenge-list:
             ball: any
             amount: 7
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false

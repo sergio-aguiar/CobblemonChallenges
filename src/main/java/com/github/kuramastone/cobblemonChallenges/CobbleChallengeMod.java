@@ -12,6 +12,7 @@ import com.github.kuramastone.cobblemonChallenges.listeners.ChallengeListener;
 import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
 import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.VoteUtils;
 import com.vexsoftware.votifier.fabric.event.VoteListener;
@@ -21,6 +22,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -219,6 +221,13 @@ public class CobbleChallengeMod implements ModInitializer {
                             if (!expiredSlots.isEmpty()) {
                                 tasksToRun.add(() -> {
                                     for (ExpiredSlot ex : expiredSlots) {
+                                        ServerPlayer player = profile.getPlayerEntity();
+
+                                        ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
+                                        if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(ex.cp.getActiveChallenge().getName())) {
+                                            ChallengeScoreboard.clearForPlayer(player);
+                                        }
+
                                         profile.removeProgressForSlot(ex.listName, ex.slot);
 
                                         CobbleChallengeMod.logger.info("Resetting expired slot {} challenge {} for player {} in list {}",
@@ -289,6 +298,13 @@ public class CobbleChallengeMod implements ModInitializer {
                                         List<ChallengeProgress> list = profile.getActiveChallengesMap().get(entry.getKey());
                                         if (list != null) {
                                             for (ChallengeProgress cp : entry.getValue()) {
+                                                ServerPlayer player = profile.getPlayerEntity();
+
+                                                ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
+                                                if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(cp.getActiveChallenge().getName())) {
+                                                    ChallengeScoreboard.clearForPlayer(player);
+                                                }
+
                                                 CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());
                                                 list.remove(cp);
 

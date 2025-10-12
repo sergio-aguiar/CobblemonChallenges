@@ -3,12 +3,14 @@ package com.github.kuramastone.cobblemonChallenges.player;
 import com.github.kuramastone.cobblemonChallenges.challenges.requirements.*;
 import com.github.kuramastone.cobblemonChallenges.events.ChallengeCompletedEvent;
 import com.github.kuramastone.cobblemonChallenges.listeners.ChallengeListener;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -93,6 +95,14 @@ public class ChallengeProgress {
                 return false;
             }
         }
+
+        ServerPlayer player = profile.getPlayerEntity();
+
+        ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
+        if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(activeChallenge.getName())) {
+            ChallengeScoreboard.clearForPlayer(player);
+        }
+
         return true;
     }
 
@@ -200,5 +210,29 @@ public class ChallengeProgress {
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+    }
+
+    public List<String> getProgressLinesForScoreboard() {
+        List<String> lines = new java.util.ArrayList<>();
+
+        for (Pair<String, Progression<?>> set : this.progressionMap) {
+            String key = set.getKey();
+            Progression<?> progression = set.getValue();
+
+            String displayName = api.getMessage(
+                "requirements.progression-shorthand.%s".formatted(key.toLowerCase())
+            ).getText();
+
+            String progressString = progression.getProgressString().replace('&', '§');
+            String line = displayName + ": §e" + progressString;
+
+            if (line.length() > 40) {
+                line = line.substring(0, 37) + "...";
+            }
+
+            lines.add(line);
+        }
+
+        return lines;
     }
 }

@@ -4,7 +4,9 @@ import com.cobblemon.mod.common.api.events.berry.BerryHarvestEvent;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import net.minecraft.world.item.ItemStack;
 
@@ -32,8 +34,8 @@ public class HarvestBerryRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new HarvestBerryProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new HarvestBerryProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -42,10 +44,12 @@ public class HarvestBerryRequirement implements Requirement {
         private PlayerProfile profile;
         private HarvestBerryRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public HarvestBerryProgression(PlayerProfile profile, HarvestBerryRequirement requirement) {
+        public HarvestBerryProgression(PlayerProfile profile, HarvestBerryRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -74,6 +78,8 @@ public class HarvestBerryRequirement implements Requirement {
                         progressAmount += drop.getCount();
                     }
                     progressAmount = Math.min(progressAmount, this.requirement.amount);
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

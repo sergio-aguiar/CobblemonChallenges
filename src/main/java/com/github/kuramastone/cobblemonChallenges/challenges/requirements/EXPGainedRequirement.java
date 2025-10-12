@@ -7,7 +7,9 @@ import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.CobblemonUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
@@ -55,8 +57,8 @@ public class EXPGainedRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new ExpGainedProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new ExpGainedProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -65,10 +67,12 @@ public class EXPGainedRequirement implements Requirement {
         private PlayerProfile profile;
         private EXPGainedRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public ExpGainedProgression(PlayerProfile profile, EXPGainedRequirement requirement) {
+        public ExpGainedProgression(PlayerProfile profile, EXPGainedRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -88,6 +92,8 @@ public class EXPGainedRequirement implements Requirement {
                 if (meetsCriteria(getType().cast(obj))) {
                     ExperienceGainedPostEvent event = getType().cast(obj);
                     progressAmount += event.getExperience();
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

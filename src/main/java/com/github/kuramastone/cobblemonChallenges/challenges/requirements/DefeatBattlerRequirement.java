@@ -11,7 +11,9 @@ import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.CobblemonUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import net.minecraft.world.entity.player.Player;
@@ -65,8 +67,8 @@ public class DefeatBattlerRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new DefeatPokemonProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new DefeatPokemonProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -75,10 +77,12 @@ public class DefeatBattlerRequirement implements Requirement {
         private PlayerProfile profile;
         public DefeatBattlerRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public DefeatPokemonProgression(PlayerProfile profile, DefeatBattlerRequirement requirement) {
+        public DefeatPokemonProgression(PlayerProfile profile, DefeatBattlerRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -98,6 +102,8 @@ public class DefeatBattlerRequirement implements Requirement {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

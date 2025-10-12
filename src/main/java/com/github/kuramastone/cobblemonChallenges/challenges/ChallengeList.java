@@ -115,7 +115,7 @@ public class ChallengeList {
 
         List<Pair<String, Progression<?>>> progs = new ArrayList<>();
         for (Requirement requirement : challenge.getRequirements()) {
-            progs.add(Pair.of(requirement.getName(), requirement.buildProgression(profile)));
+            progs.add(Pair.of(requirement.getName(), requirement.buildProgression(profile, challenge)));
         }
 
         return new ChallengeProgress(api, profile, this, challenge, progs, System.currentTimeMillis());

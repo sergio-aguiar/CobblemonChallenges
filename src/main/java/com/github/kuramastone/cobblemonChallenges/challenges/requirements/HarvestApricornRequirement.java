@@ -5,7 +5,9 @@ import com.cobblemon.mod.common.api.events.farming.ApricornHarvestEvent;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
 import java.util.UUID;
@@ -32,8 +34,8 @@ public class HarvestApricornRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new HarvestApricornProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new HarvestApricornProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -42,10 +44,12 @@ public class HarvestApricornRequirement implements Requirement {
         private PlayerProfile profile;
         private HarvestApricornRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public HarvestApricornProgression(PlayerProfile profile, HarvestApricornRequirement requirement) {
+        public HarvestApricornProgression(PlayerProfile profile, HarvestApricornRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -71,6 +75,8 @@ public class HarvestApricornRequirement implements Requirement {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

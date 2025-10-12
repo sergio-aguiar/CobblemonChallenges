@@ -3,8 +3,10 @@ package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.events.BlockPlaceEvent;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -32,8 +34,8 @@ public class PlaceBlockRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new PlaceBlockProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new PlaceBlockProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -42,10 +44,12 @@ public class PlaceBlockRequirement implements Requirement {
         private PlayerProfile profile;
         public PlaceBlockRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public PlaceBlockProgression(PlayerProfile profile, PlaceBlockRequirement requirement) {
+        public PlaceBlockProgression(PlayerProfile profile, PlaceBlockRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -65,6 +69,8 @@ public class PlaceBlockRequirement implements Requirement {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
                     progressAmount = Math.min(progressAmount, this.requirement.amount);
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

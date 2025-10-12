@@ -7,7 +7,9 @@ import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.CobblemonUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
@@ -55,8 +57,8 @@ public class CatchPokemonRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new CatchPokemonProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new CatchPokemonProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -65,10 +67,12 @@ public class CatchPokemonRequirement implements Requirement {
         private PlayerProfile profile;
         public CatchPokemonRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public CatchPokemonProgression(PlayerProfile profile, CatchPokemonRequirement requirement) {
+        public CatchPokemonProgression(PlayerProfile profile, CatchPokemonRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -87,6 +91,8 @@ public class CatchPokemonRequirement implements Requirement {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

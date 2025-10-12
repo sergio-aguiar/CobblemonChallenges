@@ -70,7 +70,7 @@ public class CommandHandler {
 
             challenges.then(
                 Commands.literal("scoreboard")
-                    .requires(source -> source.isPlayer())
+                    .requires(source -> hasPermission(source, "challenges.commands.scoreboard"))
                     .then(Commands.literal("disable")
                         .executes(CommandHandler::handleScoreboardOffCommand))
             );

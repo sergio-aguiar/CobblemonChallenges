@@ -84,6 +84,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -122,6 +123,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -133,6 +135,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -169,6 +172,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -205,6 +209,7 @@ challenge-list:
             ball: cobblemon:master_ball
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -241,6 +246,7 @@ challenge-list:
             ball: cobblemon:master_ball/cobblemon:quick_ball
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -335,6 +341,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -371,6 +378,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: true
             is_ultra_beast: false
             is_mythical: true
@@ -407,6 +415,44 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: night # You can specify multiple times, for example time_of_day: night/dusk
+            is_paradox: false
+            is_legendary: false
+            is_ultra_beast: false
+            is_mythical: false
+      rewards:
+        commands:
+          - "eco give {player} 100"
+
+    "DefeatPokemonExample-Paradox":
+      display-name: "Defeat a Paradox Pokémon"
+      repeatable: 10s
+      time-limit: "30s"
+      needs-selection: true
+      challenge-slot: 3
+      description:
+        - "&7Defeat 1 Paradox Pokémon and receive these rewards!"
+        - " "
+        - "    &dRewards:"
+        - "    &d- &7+100$"
+      display-item:
+        material: cobblemon:power_band
+        name: "&e&lDefeat 1 Paradox Pokémon"
+        lore:
+          - "{progression_status}"
+          - " "
+          - "{description}"
+          - " "
+          - "{tracking-tag}"
+      requirements:
+        1:
+          defeat_battler:
+            pokename: any
+            shiny: false
+            type: any
+            ball: any
+            amount: 1
+            time_of_day: any
+            is_paradox: true
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -542,6 +588,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -578,6 +625,7 @@ challenge-list:
             ball: master_ball
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -614,6 +662,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -767,6 +816,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -803,6 +853,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -840,6 +891,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false
@@ -1108,6 +1160,7 @@ challenge-list:
             ball: any
             amount: 1
             time_of_day: any
+            is_paradox: false
             is_legendary: false
             is_ultra_beast: false
             is_mythical: false

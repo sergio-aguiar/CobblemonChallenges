@@ -3,8 +3,10 @@ package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.events.ChallengeCompletedEvent;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
 import java.util.UUID;
@@ -32,8 +34,8 @@ public class CompleteChallengeRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        CompleteChallengeProgression ccp = new CompleteChallengeProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        CompleteChallengeProgression ccp = new CompleteChallengeProgression(profile, this, parentChallenge);
         return ccp;
     }
 
@@ -43,10 +45,12 @@ public class CompleteChallengeRequirement implements Requirement {
         private PlayerProfile profile;
         private CompleteChallengeRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public CompleteChallengeProgression(PlayerProfile profile, CompleteChallengeRequirement requirement) {
+        public CompleteChallengeProgression(PlayerProfile profile, CompleteChallengeRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -83,6 +87,8 @@ public class CompleteChallengeRequirement implements Requirement {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
                     progressAmount = Math.min(progressAmount, this.requirement.amount);
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

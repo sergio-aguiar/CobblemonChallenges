@@ -3,8 +3,10 @@ package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.events.PlayerJoinEvent;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 
 import java.util.UUID;
 
@@ -28,8 +30,8 @@ public class LoginRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
-        return new LoginProgression(profile, this);
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
+        return new LoginProgression(profile, this, parentChallenge);
     }
 
     // Static nested Progression class
@@ -38,10 +40,12 @@ public class LoginRequirement implements Requirement {
         private PlayerProfile profile;
         private LoginRequirement requirement;
         private int progressAmount;
+        private Challenge parentChallenge;
 
-        public LoginProgression(PlayerProfile profile, LoginRequirement requirement) {
+        public LoginProgression(PlayerProfile profile, LoginRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -60,6 +64,8 @@ public class LoginRequirement implements Requirement {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

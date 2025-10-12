@@ -102,6 +102,30 @@ public class PlayerProfile {
         return set;
     }
 
+    public Set<ChallengeProgress> getActiveChallenges(String listName) {
+        Set<ChallengeProgress> set = new HashSet<>();
+
+        if (api.getConfigOptions().isUsingPools()) {
+            for (Map<Integer, ChallengeProgress> slotMap : activeSlotChallenges.values()) {
+                for (ChallengeProgress progress : slotMap.values()) {
+                    if (progress.getParentList().getName().equals(listName)) {
+                        set.add(progress);
+                    }
+                }
+            }
+        } else {
+            for (List<ChallengeProgress> value : activeChallenges.values()) {
+                for (ChallengeProgress progress : value) {
+                    if (progress.getParentList().getName().equals(listName)) {
+                        set.add(progress);
+                    }
+                }
+            }
+        }
+
+        return set;
+    }
+
     public Map<Integer, ChallengeProgress> getActiveSlotChallenges(String listName) {
         return activeSlotChallenges.computeIfAbsent(listName, k -> new LinkedHashMap<>());
     }

@@ -6,7 +6,9 @@ import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
+import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
 import java.util.UUID;
@@ -34,12 +36,12 @@ public class PokemonSeenRequirement implements Requirement {
     }
 
     @Override
-    public Progression<?> buildProgression(PlayerProfile profile) {
+    public Progression<?> buildProgression(PlayerProfile profile, Challenge parentChallenge) {
         /*
         Do not ask the player to see more unique pokemon than possible
          */
 
-        PokemonSeenProgression ccp = new PokemonSeenProgression(profile, this);
+        PokemonSeenProgression ccp = new PokemonSeenProgression(profile, this, parentChallenge);
         int maxPossibleToGain = this.amount;
         try {
             int currentAmount = Cobblemon.INSTANCE.getPlayerDataManager().getPokedexData(profile.getUUID()).getSpeciesRecords().size(); // 99
@@ -63,10 +65,12 @@ public class PokemonSeenRequirement implements Requirement {
         private PlayerProfile profile;
         private PokemonSeenRequirement requirement;
         public int progressAmount;
+        private Challenge parentChallenge;
 
-        public PokemonSeenProgression(PlayerProfile profile, PokemonSeenRequirement requirement) {
+        public PokemonSeenProgression(PlayerProfile profile, PokemonSeenRequirement requirement, Challenge parentChallenge) {
             this.profile = profile;
             this.requirement = requirement;
+            this.parentChallenge = parentChallenge;
             this.progressAmount = 0;
         }
 
@@ -101,6 +105,8 @@ public class PokemonSeenRequirement implements Requirement {
                 if (meetsCriteria(getType().cast(obj))) {
                     progressAmount++;
                     progressAmount = Math.min(progressAmount, this.requirement.amount);
+
+                    ChallengeScoreboard.updateIfTracking(profile, parentChallenge.getName());
                 }
             }
         }

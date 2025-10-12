@@ -1,11 +1,18 @@
 package com.github.kuramastone.cobblemonChallenges.gui;
 
+import com.github.kuramastone.bUtilities.ComponentEditor;
+import com.github.kuramastone.cobblemonChallenges.CobbleChallengeAPI;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeItem;
 import com.github.kuramastone.cobblemonChallenges.listeners.TickScheduler;
+import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
+import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
+import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import com.mojang.brigadier.StringReader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
@@ -95,30 +102,55 @@ public class WindowItem {
     }
 
     public ItemStack handleClick(ClickType type, int dragType, Player player) {
-        // handle pages
-        if (pagesToTurn != 0) {
-            window.setCurrentPage(window.getCurrentPage() + pagesToTurn);
-        }
+        if (dragType == 0) {
+            // handle pages
+            if (pagesToTurn != 0) {
+                window.setCurrentPage(window.getCurrentPage() + pagesToTurn);
+            }
 
-        // handle commands
-        if (commands != null) {
-            MinecraftServer server = CobbleChallengeMod.getMinecraftServer();
-            for (String cmd : commands) {
-                cmd = cmd.replace("{player}", player.getName().getString());
+            // handle commands
+            if (commands != null) {
+                MinecraftServer server = CobbleChallengeMod.getMinecraftServer();
+                for (String cmd : commands) {
+                    cmd = cmd.replace("{player}", player.getName().getString());
 
-                server.getCommands()
-                        .performCommand(
-                                server.getCommands().getDispatcher()
-                                        .parse(new StringReader(cmd), server.createCommandSourceStack()), cmd);
+                    server.getCommands()
+                            .performCommand(
+                                    server.getCommands().getDispatcher()
+                                            .parse(new StringReader(cmd), server.createCommandSourceStack()), cmd);
+                }
+            }
+
+            // use runnable if set
+            if (runnableOnClick != null) {
+                runnableOnClick.run();
+            }
+        } else if (dragType == 1) {
+            if (builder instanceof ChallengeItem challengeItem && player instanceof ServerPlayer serverPlayer) {
+                Challenge challenge = challengeItem.getChallenge();
+                CobbleChallengeAPI api = CobbleChallengeMod.instance.getAPI();
+                PlayerProfile profile = api.getOrCreateProfile(serverPlayer.getUUID());
+
+                if (challenge != null && profile != null) {
+                    ChallengeProgress progress = profile.getActiveChallengeProgress(challenge.getName());
+                    if (progress != null) {
+                        if (ChallengeScoreboard.setTrackedChallenge(serverPlayer, progress)) {
+                            List<String> lines = List.of(StringUtils.splitByLineBreak(
+                                api.getMessage(
+                                        "challenges.tracking",
+                                        "{challenge}", progress.getActiveChallenge().getDisplayName(),
+                                        "{challenge-description}", progress.getActiveChallenge().getDescription()
+                                ).getText()
+                            ));
+                            List<String> formatted = StringUtils.centerStringListTags(lines);
+                            for (String line : formatted) {
+                                profile.sendMessage(ComponentEditor.decorateComponent(line));
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        // use runnable if set
-        if (runnableOnClick != null) {
-            runnableOnClick.run();
-        }
-
-        // return nothing to the player's cursor by default
         return ItemStack.EMPTY;
     }
 

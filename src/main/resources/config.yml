@@ -52,6 +52,8 @@ Messages:
       - "&6Challenges: &bChallenge Expired: {challenge}"
     randomized:
       - "&6Challenges: &bChallenge Available: {challenge}"
+    tracking:
+      - "&6Challenges: &bTracking Challenge: {challenge}"
     progression_status:
       before-attempt: "&6Status: &ePending (Click to track)"
       during-attempt: "&6Status: &aIn progress"

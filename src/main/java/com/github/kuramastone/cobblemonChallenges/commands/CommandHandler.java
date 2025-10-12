@@ -9,6 +9,7 @@ import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeMenuGUI;
 import com.github.kuramastone.cobblemonChallenges.player.ChallengeProgress;
 import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.PermissionUtils;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -65,6 +66,13 @@ public class CommandHandler {
                 Commands.literal("info")
                     .requires(source -> hasPermission(source, "challenges.commands.info"))
                     .executes(CommandHandler::handleInfoCommand)
+            );
+
+            challenges.then(
+                Commands.literal("scoreboard")
+                    .requires(source -> source.isPlayer())
+                    .then(Commands.literal("disable")
+                        .executes(CommandHandler::handleScoreboardOffCommand))
             );
 
             /* challenges.then(
@@ -208,11 +216,11 @@ public class CommandHandler {
         try {
             CommandSourceStack source = context.getSource();
 
-            String box = ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "========================" + "\n"
+            String box = ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "===========================" + "\n"
                     + ChatFormatting.RESET + "" + ChatFormatting.GOLD + " Cobblemon Challenges "
                     + ChatFormatting.GRAY + "v" + FabricLoader.getInstance().getModContainer("cobblemonchallenges").orElseThrow().getMetadata().getVersion().getFriendlyString() + "\n"
-                    + ChatFormatting.WHITE + " Fork maintained by: " + ChatFormatting.YELLOW + "pioavenger " + ChatFormatting.WHITE + "!\n"
-                    + ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "========================";
+                    + ChatFormatting.WHITE + " Version maintained by: " + ChatFormatting.YELLOW + "pioavenger " + ChatFormatting.WHITE + "!\n"
+                    + ChatFormatting.GOLD + "" + ChatFormatting.BOLD + "===========================";
 
             Component message = Component.literal(box);
             source.sendSystemMessage(message);
@@ -223,6 +231,25 @@ public class CommandHandler {
         }
 
         return 0;
+    }
+
+    private static int handleScoreboardOffCommand(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            if (!source.isPlayer()) {
+                source.sendFailure(Component.literal("Only players can use this command.").withStyle(ChatFormatting.RED));
+                return 1;
+            }
+
+            ServerPlayer player = context.getSource().getPlayer();
+            ChallengeScoreboard.clearForPlayer(player);
+
+            return 0;
+        } catch (Exception e) {
+            CobbleChallengeMod.logger.error("Error disabling Scoreboard: %s".formatted(e.getMessage()));
+            e.printStackTrace();
+            return 1;
+        }
     }
 
     private static int handleMigrateLegacyCommand(CommandContext<CommandSourceStack> context) {

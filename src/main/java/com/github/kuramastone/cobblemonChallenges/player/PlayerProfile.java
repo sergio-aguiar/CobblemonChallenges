@@ -11,6 +11,7 @@ import com.github.kuramastone.cobblemonChallenges.gui.SimpleWindow;
 import com.github.kuramastone.cobblemonChallenges.gui.WindowItem;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeItem;
 import com.github.kuramastone.cobblemonChallenges.guis.ChallengeListGUI;
+import com.github.kuramastone.cobblemonChallenges.scoreboard.ChallengeScoreboard;
 import com.github.kuramastone.cobblemonChallenges.utils.FabricAdapter;
 import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 
@@ -201,6 +202,10 @@ public class PlayerProfile {
                     for (Iterator<Map.Entry<Integer, ChallengeProgress>> it = slots.entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry<Integer, ChallengeProgress> entry = it.next();
                         if (entry.getValue().getActiveChallenge().doesNeedSelection()) {
+                            if (ChallengeScoreboard.getTrackedChallenge(playerEntity).getActiveChallenge().getName().equals(entry.getValue().getActiveChallenge().getName())) {
+                                ChallengeScoreboard.clearForPlayer(playerEntity);
+                            }
+
                             it.remove();
                             break;
                         }

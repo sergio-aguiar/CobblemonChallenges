@@ -1,6 +1,7 @@
 package com.github.kuramastone.cobblemonChallenges.scoreboard;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,10 +13,12 @@ import com.github.kuramastone.cobblemonChallenges.player.PlayerProfile;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
+import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
+import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
@@ -24,13 +27,12 @@ public class ChallengeScoreboard {
     private static final ConcurrentHashMap<UUID, ChallengeProgress> playerTrackedChallenges = new ConcurrentHashMap<>();
 
     public static boolean showForPlayer(ServerPlayer player, PlayerProfile profile) {
-        Scoreboard board = player.getServer().getScoreboard();
         String playerObjectiveName = getPlayerObjectiveName(player);
 
-        Objective old = board.getObjective(playerObjectiveName);
-        if (old != null) board.removeObjective(old);
+        clearForPlayer(player);
 
-        Objective objective = board.addObjective(
+        Objective objective = new Objective(
+            new Scoreboard(),
             playerObjectiveName,
             ObjectiveCriteria.DUMMY,
             Component.literal("§e§l     Challenge Tracking     "),
@@ -38,7 +40,9 @@ public class ChallengeScoreboard {
             false,
             (NumberFormat) null
         );
-        player.getScoreboard().setDisplayObjective(DisplaySlot.SIDEBAR, objective);
+
+        player.connection.send(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_ADD));
+        player.connection.send(new ClientboundSetDisplayObjectivePacket(DisplaySlot.SIDEBAR, objective));
 
         ChallengeProgress trackedChallengeProgress = playerTrackedChallenges.get(player.getUUID());
         if (trackedChallengeProgress == null) {
@@ -53,26 +57,24 @@ public class ChallengeScoreboard {
         }
 
         List<String> lines = trackedChallengeProgress.getProgressLinesForScoreboard();
-
-        String challengeName = trackedChallenge.getDisplayName();
-        List<String> wrappedNameLines = wrapScoreboardText(challengeName, 36);
+        List<String> wrappedNameLines = wrapScoreboardText(trackedChallenge.getDisplayName(), 36);
 
         int score = wrappedNameLines.size() + lines.size();
         
-        addLine(board, objective, "  ", score--, false);
+        addLine(player, playerObjectiveName, objective, "  ", score--, false);
 
         for (String nameLine : wrappedNameLines) {
-            addLine(board, objective, nameLine, score--, false);
+            addLine(player, playerObjectiveName, objective, nameLine, score--, false);
         }
 
         for (String line : lines) {
-            addLine(board, objective, line, score--, true);
+            addLine(player, playerObjectiveName, objective, line, score--, true);
         }
 
         return true;
     }
 
-    private static void addLine(Scoreboard board, Objective obj, String text, int score, boolean progressLine) {
+    private static void addLine(ServerPlayer player, String objectiveName, Objective obj, String text, int score, boolean progressLine) {
         String visibleText = text;
         String rawKey = net.minecraft.ChatFormatting.stripFormatting(visibleText);
 
@@ -80,17 +82,23 @@ public class ChallengeScoreboard {
         String suffix = "§" + Integer.toHexString((id >> 4) & 0xF) + "§" + Integer.toHexString(id & 0xF);
         rawKey = "§6" + (progressLine ? "│ §f" : "") + rawKey + suffix;
 
-        board.getOrCreatePlayerScore(ScoreHolder.forNameOnly(rawKey), obj).set(score);
+        player.connection.send(new ClientboundSetScorePacket(rawKey, objectiveName, score, Optional.of(Component.literal(rawKey)), Optional.empty()));
     }
 
     public static void clearForPlayer(ServerPlayer player) {
-        Scoreboard board = player.getServer().getScoreboard();
         String playerObjectiveName = getPlayerObjectiveName(player);
 
-        Objective objective = board.getObjective(playerObjectiveName);
-        if (objective != null) {
-            board.removeObjective(objective);
-        }
+        Objective objective = new Objective(
+            new Scoreboard(),
+            playerObjectiveName,
+            ObjectiveCriteria.DUMMY,
+            Component.literal("§e§l     Challenge Tracking     "),
+            ObjectiveCriteria.RenderType.INTEGER,
+            false,
+            (NumberFormat) null
+        );
+
+        player.connection.send(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_REMOVE));
     }
 
     public static String getPlayerObjectiveName(ServerPlayer player) {

@@ -130,7 +130,7 @@ public class ChallengeScoreboard {
 
         ChallengeProgress tracked = playerTrackedChallenges.get(uuid);
 
-        if (tracked != null && tracked.getActiveChallenge().getName().equals(challengeName) && player.getScoreboard().getDisplayObjective(DisplaySlot.SIDEBAR) != null) {
+        if (tracked != null && tracked.getActiveChallenge().getName().equals(challengeName)) {
             showForPlayer(player, profile);
         }
     }

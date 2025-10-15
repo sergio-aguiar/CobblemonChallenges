@@ -235,6 +235,10 @@ public class PlayerProfile {
                     for (Iterator<ChallengeProgress> it = progressInList.iterator(); it.hasNext(); ) {
                         ChallengeProgress cp = it.next();
                         if (cp.getActiveChallenge().doesNeedSelection()) {
+                            if (ChallengeScoreboard.getTrackedChallenge(playerEntity).getActiveChallenge().getName().equals(cp.getActiveChallenge().getName())) {
+                                ChallengeScoreboard.clearForPlayer(playerEntity);
+                            }
+
                             it.remove();
                             break;
                         }

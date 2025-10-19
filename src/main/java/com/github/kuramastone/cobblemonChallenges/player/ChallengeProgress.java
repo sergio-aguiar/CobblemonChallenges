@@ -100,7 +100,7 @@ public class ChallengeProgress {
 
         ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
         if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(activeChallenge.getName())) {
-            ChallengeScoreboard.clearForPlayer(player);
+            ChallengeScoreboard.clearForPlayer(player, true);
         }
 
         return true;

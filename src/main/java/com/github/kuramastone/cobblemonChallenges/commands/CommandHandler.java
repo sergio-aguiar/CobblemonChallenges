@@ -100,6 +100,12 @@ public class CommandHandler {
                     .executes(CommandHandler::handleRestartAllCommand)
             );
 
+            challenges.then(
+                Commands.literal("save")
+                    .requires(source -> hasPermission(source, "challenges.commands.admin.save"))
+                    .executes(CommandHandler::handleSaveCommand)
+            );
+
             dispatcher.register(challenges);
         });
     }
@@ -125,6 +131,12 @@ public class CommandHandler {
 
         CobbleChallengeMod.instance.getAPI().saveProfiles();
         context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.restartall")));
+        return 1;
+    }
+
+    private static int handleSaveCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        api.saveProfiles();
+        context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.save")));
         return 1;
     }
 

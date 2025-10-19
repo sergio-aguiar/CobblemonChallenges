@@ -242,7 +242,7 @@ public class CommandHandler {
             }
 
             ServerPlayer player = context.getSource().getPlayer();
-            ChallengeScoreboard.clearForPlayer(player);
+            ChallengeScoreboard.clearForPlayer(player, true);
 
             return 0;
         } catch (Exception e) {

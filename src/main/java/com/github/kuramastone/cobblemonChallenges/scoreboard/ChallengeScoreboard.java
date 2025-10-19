@@ -29,7 +29,7 @@ public class ChallengeScoreboard {
     public static boolean showForPlayer(ServerPlayer player, PlayerProfile profile) {
         String playerObjectiveName = getPlayerObjectiveName(player);
 
-        clearForPlayer(player);
+        clearForPlayer(player, false);
 
         Objective objective = new Objective(
             new Scoreboard(),
@@ -46,13 +46,13 @@ public class ChallengeScoreboard {
 
         ChallengeProgress trackedChallengeProgress = playerTrackedChallenges.get(player.getUUID());
         if (trackedChallengeProgress == null) {
-            clearForPlayer(player);
+            clearForPlayer(player, true);
             return false;
         }
 
         Challenge trackedChallenge = trackedChallengeProgress.getActiveChallenge();
         if (trackedChallenge == null) {
-            clearForPlayer(player);
+            clearForPlayer(player, true);
             return false;
         }
 
@@ -85,7 +85,7 @@ public class ChallengeScoreboard {
         player.connection.send(new ClientboundSetScorePacket(rawKey, objectiveName, score, Optional.of(Component.literal(rawKey)), Optional.empty()));
     }
 
-    public static void clearForPlayer(ServerPlayer player) {
+    public static void clearForPlayer(ServerPlayer player, boolean resetTracking) {
         String playerObjectiveName = getPlayerObjectiveName(player);
 
         Objective objective = new Objective(
@@ -99,6 +99,8 @@ public class ChallengeScoreboard {
         );
 
         player.connection.send(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_REMOVE));
+
+        if (resetTracking && playerTrackedChallenges.containsKey(player.getUUID())) playerTrackedChallenges.remove(player.getUUID());
     }
 
     public static String getPlayerObjectiveName(ServerPlayer player) {
@@ -108,7 +110,7 @@ public class ChallengeScoreboard {
     public static boolean setTrackedChallenge(ServerPlayer player, ChallengeProgress progress) {
         if (progress == null) {
             playerTrackedChallenges.remove(player.getUUID());
-            clearForPlayer(player);
+            clearForPlayer(player, true);
             return false;
         }
 

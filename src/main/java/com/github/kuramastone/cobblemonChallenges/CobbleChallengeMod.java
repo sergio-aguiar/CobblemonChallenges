@@ -225,7 +225,7 @@ public class CobbleChallengeMod implements ModInitializer {
 
                                         ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
                                         if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(ex.cp.getActiveChallenge().getName())) {
-                                            ChallengeScoreboard.clearForPlayer(player);
+                                            ChallengeScoreboard.clearForPlayer(player, true);
                                         }
 
                                         profile.removeProgressForSlot(ex.listName, ex.slot);
@@ -302,7 +302,7 @@ public class CobbleChallengeMod implements ModInitializer {
 
                                                 ChallengeProgress tracked = ChallengeScoreboard.getTrackedChallenge(player);
                                                 if (tracked == null || tracked.getActiveChallenge() == null || tracked.getActiveChallenge().getName().equals(cp.getActiveChallenge().getName())) {
-                                                    ChallengeScoreboard.clearForPlayer(player);
+                                                    ChallengeScoreboard.clearForPlayer(player, true);
                                                 }
 
                                                 CobbleChallengeMod.logger.info("Resetting expired challenge {} for player {}", cp.getActiveChallenge().getName(), profile.getUUID());

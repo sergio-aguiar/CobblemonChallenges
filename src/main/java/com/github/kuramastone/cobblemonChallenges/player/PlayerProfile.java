@@ -202,8 +202,14 @@ public class PlayerProfile {
                     for (Iterator<Map.Entry<Integer, ChallengeProgress>> it = slots.entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry<Integer, ChallengeProgress> entry = it.next();
                         if (entry.getValue().getActiveChallenge().doesNeedSelection()) {
-                            if (ChallengeScoreboard.getTrackedChallenge(playerEntity).getActiveChallenge().getName().equals(entry.getValue().getActiveChallenge().getName())) {
-                                ChallengeScoreboard.clearForPlayer(playerEntity);
+                            ChallengeProgress progress = ChallengeScoreboard.getTrackedChallenge(playerEntity);
+
+                            if (progress != null) {
+                                Challenge progressChallenge = progress.getActiveChallenge();
+                                
+                                if (progressChallenge != null && progressChallenge.getName().equals(entry.getValue().getActiveChallenge().getName())) {
+                                    ChallengeScoreboard.clearForPlayer(playerEntity, true);
+                                }
                             }
 
                             it.remove();
@@ -236,7 +242,7 @@ public class PlayerProfile {
                         ChallengeProgress cp = it.next();
                         if (cp.getActiveChallenge().doesNeedSelection()) {
                             if (ChallengeScoreboard.getTrackedChallenge(playerEntity).getActiveChallenge().getName().equals(cp.getActiveChallenge().getName())) {
-                                ChallengeScoreboard.clearForPlayer(playerEntity);
+                                ChallengeScoreboard.clearForPlayer(playerEntity, true);
                             }
 
                             it.remove();

@@ -19,6 +19,7 @@ Messages:
     restart: "{prefix} &2This player has had their challenge history reset!"
     restartall: "{prefix} &2All players have had their challenge history reset!"
     migrate: "{prefix} &2Legacy mode data has been migrated to pool-mode based on the currently loaded challenge data!"
+    save: "{prefix} &2All players have had their data saved!"
   requirements:
     # When listing a player's progress on a challenge, these will be the prefix for that
     progression-shorthand:

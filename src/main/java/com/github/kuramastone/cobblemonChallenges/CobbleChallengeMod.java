@@ -2,6 +2,19 @@ package com.github.kuramastone.cobblemonChallenges;
 
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
+import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
+import com.cobblemon.mod.common.api.events.berry.BerryHarvestEvent;
+import com.cobblemon.mod.common.api.events.farming.ApricornHarvestEvent;
+import com.cobblemon.mod.common.api.events.pokedex.scanning.PokemonScannedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.ExperienceGainedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.FossilRevivedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent;
+import com.cobblemon.mod.common.api.events.pokemon.LevelUpEvent;
+import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.PokemonSeenEvent;
+import com.cobblemon.mod.common.api.events.pokemon.TradeEvent;
+import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
+import com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent;
 import com.github.kuramastone.bUtilities.ComponentEditor;
 import com.github.kuramastone.cobblemonChallenges.challenges.Challenge;
 import com.github.kuramastone.cobblemonChallenges.challenges.ChallengeList;
@@ -17,6 +30,8 @@ import com.github.kuramastone.cobblemonChallenges.utils.StringUtils;
 import com.github.kuramastone.cobblemonChallenges.utils.VoteUtils;
 import com.vexsoftware.votifier.fabric.event.VoteListener;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -376,19 +391,19 @@ public class CobbleChallengeMod implements ModInitializer {
         BlockPlaceEvent.register();
         PlayerJoinEvent.register();
         ServerTickEvents.START_SERVER_TICK.register(PlayTimeScheduler::onServerTick);
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.HIGHEST, ChallengeListener::onPokemonCaptured);
-        CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.HIGHEST, ChallengeListener::onPokemonPokedexScanned);
-        CobblemonEvents.BATTLE_VICTORY.subscribe(Priority.HIGHEST, ChallengeListener::onBattleVictory);
-        CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.HIGHEST, ChallengeListener::onEvolution);
-        CobblemonEvents.APRICORN_HARVESTED.subscribe(Priority.HIGHEST, ChallengeListener::onApricornHarvest);
-        CobblemonEvents.BERRY_HARVEST.subscribe(Priority.HIGHEST, ChallengeListener::onBerryHarvest);
-        CobblemonEvents.POKEMON_SEEN.subscribe(Priority.HIGHEST, ChallengeListener::onPokemonPokedexSeen);
-        CobblemonEvents.EXPERIENCE_CANDY_USE_POST.subscribe(Priority.HIGHEST, ChallengeListener::onRareCandyUsed);
-        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.HIGHEST, ChallengeListener::onEggHatch);
-        CobblemonEvents.EXPERIENCE_GAINED_EVENT_POST.subscribe(Priority.HIGHEST, ChallengeListener::onExpGained);
-        CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.HIGHEST, ChallengeListener::onLevelUp);
-        CobblemonEvents.TRADE_EVENT_POST.subscribe(Priority.HIGHEST, ChallengeListener::onTradeCompleted);
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.HIGHEST, ChallengeListener::onFossilRevived);
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.HIGHEST, (Function1<PokemonCapturedEvent, Unit>) ChallengeListener::onPokemonCaptured);
+        CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.HIGHEST, (Function1<PokemonScannedEvent, Unit>) ChallengeListener::onPokemonPokedexScanned);
+        CobblemonEvents.BATTLE_VICTORY.subscribe(Priority.HIGHEST, (Function1<BattleVictoryEvent, Unit>) ChallengeListener::onBattleVictory);
+        CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.HIGHEST, (Function1<EvolutionCompleteEvent, Unit>) ChallengeListener::onEvolution);
+        CobblemonEvents.APRICORN_HARVESTED.subscribe(Priority.HIGHEST, (Function1<ApricornHarvestEvent, Unit>) ChallengeListener::onApricornHarvest);
+        CobblemonEvents.BERRY_HARVEST.subscribe(Priority.HIGHEST, (Function1<BerryHarvestEvent, Unit>) ChallengeListener::onBerryHarvest);
+        CobblemonEvents.POKEMON_SEEN.subscribe(Priority.HIGHEST, (Function1<PokemonSeenEvent, Unit>) ChallengeListener::onPokemonPokedexSeen);
+        CobblemonEvents.EXPERIENCE_CANDY_USE_POST.subscribe(Priority.HIGHEST, (Function1<ExperienceCandyUseEvent.Post, Unit>) ChallengeListener::onRareCandyUsed);
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.HIGHEST, (Function1<HatchEggEvent.Post, Unit>) ChallengeListener::onEggHatch);
+        CobblemonEvents.EXPERIENCE_GAINED_EVENT_POST.subscribe(Priority.HIGHEST, (Function1<ExperienceGainedEvent.Post, Unit>) ChallengeListener::onExpGained);
+        CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.HIGHEST, (Function1<LevelUpEvent, Unit>) ChallengeListener::onLevelUp);
+        CobblemonEvents.TRADE_EVENT_POST.subscribe(Priority.HIGHEST, (Function1<TradeEvent.Post, Unit>) ChallengeListener::onTradeCompleted);
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.HIGHEST, (Function1<FossilRevivedEvent, Unit>) ChallengeListener::onFossilRevived);
 
         if (VoteUtils.isVotifierLoaded()) {
             VoteListener.EVENT.register(event -> {

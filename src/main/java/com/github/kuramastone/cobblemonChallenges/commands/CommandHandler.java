@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -91,7 +90,16 @@ public class CommandHandler {
             challenges.then(
                 Commands.literal("migrate")
                     .requires(source -> hasPermission(source, "challenges.commands.admin.migrate"))
-                    .executes(CommandHandler::handleMigrateLegacyCommand)
+                    .executes(cmd -> {
+                        cmd.getSource().sendSystemMessage(Component.literal("Specify either v1 or v2."));
+                        return 1;
+                    })
+                    .then(Commands.literal("v1")
+                        .executes(CommandHandler::handleMigrateLegacyCommand)
+                    )
+                    .then(Commands.literal("v2")
+                        .executes(CommandHandler::handleMigrateFileSplitCommand)
+                    )
             );
 
             challenges.then(
@@ -155,7 +163,7 @@ public class CommandHandler {
     }
 
     private static int handleReloadCommand(CommandContext<CommandSourceStack> context) {
-        api.reloadConfig();
+        api.reloadConfig(false);
         context.getSource().sendSystemMessage(FabricAdapter.adapt(api.getMessage("commands.reload")));
         return 1;
     }
@@ -355,7 +363,7 @@ public class CommandHandler {
                     profile.getActiveChallengesMap().remove(listName);
                 }
             }
-            api.reloadConfig();
+            api.reloadConfig(true);
 
             source.sendSystemMessage(Component.literal("Migrated " + migratedCount + " legacy challenges to slot-based mode.").withStyle(ChatFormatting.GREEN));
 
@@ -367,6 +375,27 @@ public class CommandHandler {
 
         return 0;
     }
+
+    private static int handleMigrateFileSplitCommand(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+
+            if (source.isPlayer()) {
+                source.sendSystemMessage(Component.literal("Players can not use this command.")
+                        .withStyle(ChatFormatting.RED));
+                return 1;
+            }
+
+            if (api.migrateLegacyPoolFile()) api.reloadConfig(false);
+            return 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 
     private static void copyProgressionData(Progression<?> oldProg, Progression<?> newProg) {
         try {

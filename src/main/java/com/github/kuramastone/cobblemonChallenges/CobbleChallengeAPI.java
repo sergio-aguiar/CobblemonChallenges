@@ -85,7 +85,7 @@ public class CobbleChallengeAPI implements SimpleAPI {
                                         String challengeName = slotSection.getString("challenge");
                                         Challenge challenge = list.getChallenge(challengeName);
 
-                                        if (challenge != null) {
+                                        if (challenge != null && !profile.isChallengeCompleted(challenge.getName())) {
                                             ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
                                             progress.setStartTime(slotSection.containsKey("startTime") ?
                                                     slotSection.getLong("startTime") : System.currentTimeMillis());
@@ -263,21 +263,23 @@ public class CobbleChallengeAPI implements SimpleAPI {
                                         Challenge challenge = list.getChallenge(challengeName);
 
                                         if (challenge != null) {
-                                            ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
-                                            progress.setStartTime(slotSection.containsKey("startTime") ?
-                                                    slotSection.getLong("startTime") : System.currentTimeMillis());
+                                            if (!profile.isChallengeCompleted(challenge.getName())) {
+                                                ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
+                                                progress.setStartTime(slotSection.containsKey("startTime") ?
+                                                        slotSection.getLong("startTime") : System.currentTimeMillis());
 
-                                            int index = 0;
-                                            for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
-                                                YamlConfig progSection = slotSection.getSection(index++ + "." + progSet.getKey());
-                                                if (progSection != null) {
-                                                    progSet.getValue().loadFrom(uuid, progSection);
+                                                int index = 0;
+                                                for (Pair<String, Progression<?>> progSet : progress.getProgressionMap()) {
+                                                    YamlConfig progSection = slotSection.getSection(index++ + "." + progSet.getKey());
+                                                    if (progSection != null) {
+                                                        progSet.getValue().loadFrom(uuid, progSection);
+                                                    }
                                                 }
-                                            }
 
-                                            profile.setProgressForSlot(list.getName(), slot, progress);
-                                            if (!challenge.doesNeedSelection()) {
-                                                profile.addActiveChallenge(progress);
+                                                profile.setProgressForSlot(list.getName(), slot, progress);
+                                                if (!challenge.doesNeedSelection()) {
+                                                    profile.addActiveChallenge(progress);
+                                                }
                                             }
                                         }
                                     }
@@ -407,7 +409,7 @@ public class CobbleChallengeAPI implements SimpleAPI {
                         for (String strChallenge : listSection.getKeys("", false)) {
                             Challenge challenge = list.getChallenge(strChallenge);
                             // removed challenges are no longer loaded, ignore null challenges
-                            if (challenge != null) {
+                            if (challenge != null && !profile.isChallengeCompleted(challenge.getName())) {
                                 ChallengeProgress progress = list.buildNewProgressForQuest(challenge, profile);
                                 YamlConfig challengeSection = listSection.getSection(strChallenge);
 
@@ -468,9 +470,9 @@ public class CobbleChallengeAPI implements SimpleAPI {
                             for (Map.Entry<Integer, ChallengeProgress> slotEntry : activeSlots.entrySet()) {
                                 int slot = slotEntry.getKey();
                                 ChallengeProgress cp = slotEntry.getValue();
-                                YamlConfig slotSection = slotsSection.getOrCreateSection(String.valueOf(slot));
 
-                                if (cp != null && cp.getActiveChallenge() != null) {
+                                if (cp != null && cp.getActiveChallenge() != null && !profile.isChallengeCompleted(cp.getActiveChallenge().getName())) {
+                                    YamlConfig slotSection = slotsSection.getOrCreateSection(String.valueOf(slot));
                                     slotSection.set("challenge", cp.getActiveChallenge().getName());
                                     slotSection.set("startTime", cp.getStartTime());
 
@@ -495,15 +497,17 @@ public class CobbleChallengeAPI implements SimpleAPI {
                 } else {
                     for (Map.Entry<String, List<ChallengeProgress>> set : profile.getActiveChallengesMap().entrySet()) {
                         for (ChallengeProgress cp : set.getValue()) {
-                            YamlConfig challengeSection = profileEntry.getOrCreateSection(
-                                    "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
-                            challengeSection.set("startTime", cp.getStartTime());
-                            int index = 0;
-                            for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
-                                YamlConfig progSection = challengeSection.getOrCreateSection(
-                                        "%s.%s"
-                                                .formatted(index++, progSet.getKey()));
-                                progSet.getValue().writeTo(progSection);
+                            if (!profile.isChallengeCompleted(cp.getActiveChallenge().getName())) {
+                                YamlConfig challengeSection = profileEntry.getOrCreateSection(
+                                        "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
+                                challengeSection.set("startTime", cp.getStartTime());
+                                int index = 0;
+                                for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
+                                    YamlConfig progSection = challengeSection.getOrCreateSection(
+                                            "%s.%s"
+                                                    .formatted(index++, progSet.getKey()));
+                                    progSet.getValue().writeTo(progSection);
+                                }
                             }
                         }
                     }
@@ -558,9 +562,9 @@ public class CobbleChallengeAPI implements SimpleAPI {
                             for (Map.Entry<Integer, ChallengeProgress> slotEntry : activeSlots.entrySet()) {
                                 int slot = slotEntry.getKey();
                                 ChallengeProgress cp = slotEntry.getValue();
-                                YamlConfig slotSection = slotsSection.getOrCreateSection(String.valueOf(slot));
 
-                                if (cp != null && cp.getActiveChallenge() != null) {
+                                if (cp != null && cp.getActiveChallenge() != null && !profile.isChallengeCompleted(cp.getActiveChallenge().getName())) {
+                                    YamlConfig slotSection = slotsSection.getOrCreateSection(String.valueOf(slot));
                                     slotSection.set("challenge", cp.getActiveChallenge().getName());
                                     slotSection.set("startTime", cp.getStartTime());
 
@@ -585,15 +589,17 @@ public class CobbleChallengeAPI implements SimpleAPI {
                 } else {
                     for (Map.Entry<String, List<ChallengeProgress>> set : profile.getActiveChallengesMap().entrySet()) {
                         for (ChallengeProgress cp : set.getValue()) {
-                            YamlConfig challengeSection = uuidRoot.getOrCreateSection(
-                                    "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
-                            challengeSection.set("startTime", cp.getStartTime());
-                            int index = 0;
-                            for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
-                                YamlConfig progSection = challengeSection.getOrCreateSection(
-                                        "%s.%s"
-                                                .formatted(index++, progSet.getKey()));
-                                progSet.getValue().writeTo(progSection);
+                            if (!profile.isChallengeCompleted(cp.getActiveChallenge().getName())) {
+                                YamlConfig challengeSection = uuidRoot.getOrCreateSection(
+                                        "progression.%s.%s".formatted(set.getKey(), cp.getActiveChallenge().getName()));
+                                challengeSection.set("startTime", cp.getStartTime());
+                                int index = 0;
+                                for (Pair<String, Progression<?>> progSet : cp.getProgressionMap()) {
+                                    YamlConfig progSection = challengeSection.getOrCreateSection(
+                                            "%s.%s"
+                                                    .formatted(index++, progSet.getKey()));
+                                    progSet.getValue().writeTo(progSection);
+                                }
                             }
                         }
                     }

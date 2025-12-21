@@ -38,7 +38,7 @@ public class UseRareCandyRequirement implements Requirement {
     }
 
     // Progression class to track the use of Rare Candies
-    public static class UseRareCandyOnProgression implements Progression<ExperienceCandyUseEvent> {
+    public static class UseRareCandyOnProgression implements Progression<ExperienceCandyUseEvent.Post> {
 
         private PlayerProfile profile;
         private UseRareCandyRequirement requirement;
@@ -53,12 +53,14 @@ public class UseRareCandyRequirement implements Requirement {
         }
 
         @Override
-        public Class<ExperienceCandyUseEvent> getType() {
-            return ExperienceCandyUseEvent.class;
+        public Class<ExperienceCandyUseEvent.Post> getType() {
+            return ExperienceCandyUseEvent.Post.class;
         }
 
         @Override
-        public boolean meetsCriteria(ExperienceCandyUseEvent event) {
+        public boolean meetsCriteria(ExperienceCandyUseEvent.Post event) {
+            if (!event.wasCandyConsumed()) return false;
+
             // Get the Pokémon name being used with the Rare Candy
             String pokemonName = event.getPokemon().getSpecies().getName();
 
@@ -75,6 +77,7 @@ public class UseRareCandyRequirement implements Requirement {
         public void progress(Object obj) {
             if (matchesMethod(obj)) {
                 if (meetsCriteria(getType().cast(obj))) {
+
                     progressAmount++;
                     progressAmount = Math.min(progressAmount, this.requirement.amount);
 

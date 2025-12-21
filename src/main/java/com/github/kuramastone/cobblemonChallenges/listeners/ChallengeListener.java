@@ -4,7 +4,6 @@ import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
 import com.cobblemon.mod.common.api.events.berry.BerryHarvestEvent;
 import com.cobblemon.mod.common.api.events.farming.ApricornHarvestEvent;
-import com.cobblemon.mod.common.api.events.pokedex.scanning.PokemonScannedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.*;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.pokemon.interaction.ExperienceCandyUseEvent;
@@ -60,8 +59,8 @@ public class ChallengeListener {
         return null;
     }
 
-    public static Unit onPokemonPokedexScanned(PokemonScannedEvent event) {
-        passEvent(event, event.getPlayer());
+    public static Unit onPokemonPokedexScanned(PokedexDataChangedEvent.Pre event) {
+        passEvent(event, event.getPlayerUUID());
         return null;
     }
 

@@ -1,8 +1,10 @@
 package com.github.kuramastone.cobblemonChallenges.challenges.requirements;
 
 import com.cobblemon.mod.common.Cobblemon;
-import com.cobblemon.mod.common.api.events.pokedex.scanning.PokemonScannedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.PokedexDataChangedEvent;
+import com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.github.kuramastone.bUtilities.yaml.YamlConfig;
 import com.github.kuramastone.bUtilities.yaml.YamlKey;
 import com.github.kuramastone.cobblemonChallenges.CobbleChallengeMod;
@@ -45,7 +47,7 @@ public class PokemonScannedRequirement implements Requirement {
         int maxPossibleToGain = this.amount;
         try {
             int currentAmount = Cobblemon.INSTANCE.getPlayerDataManager().getPokedexData(profile.getUUID()).getSpeciesRecords().size(); // 99
-            int maxPokedexEntries = PokemonSpecies.INSTANCE.count(); // 100
+            int maxPokedexEntries = PokemonSpecies.count(); // 100
             maxPossibleToGain = Math.max(0, maxPokedexEntries - currentAmount); // 1
         } catch (Exception e) {
             CobbleChallengeMod.logger.error("Unable to read cobblemon nbt data for player '{}' for the PokemonScannedRequirement. Ignoring their data. Is it corrupted? Error type is: '{}'",
@@ -60,7 +62,7 @@ public class PokemonScannedRequirement implements Requirement {
     }
 
     // Progression class to track progress
-    public static class CompletePokedexEntriesProgression implements Progression<PokemonScannedEvent> {
+    public static class CompletePokedexEntriesProgression implements Progression<PokedexDataChangedEvent.Pre> {
 
         private PlayerProfile profile;
         private PokemonScannedRequirement requirement;
@@ -75,18 +77,26 @@ public class PokemonScannedRequirement implements Requirement {
         }
 
         @Override
-        public Class<PokemonScannedEvent> getType() {
-            return PokemonScannedEvent.class;
+        public Class<PokedexDataChangedEvent.Pre> getType() {
+            return PokedexDataChangedEvent.Pre.class;
         }
 
         @Override
-        public boolean meetsCriteria(PokemonScannedEvent event) {
+        public boolean meetsCriteria(PokedexDataChangedEvent.Pre event) {
+            Pokemon pokemon = event.getDataSource().getPokemon();
+            PokedexEntryProgress before = event.getPokedexManager().getKnowledgeForSpecies(pokemon.getSpecies().getResourceIdentifier());
+            PokedexEntryProgress after = event.getKnowledge();
+            
+            if (before.equals(PokedexEntryProgress.NONE) && (after.equals(PokedexEntryProgress.ENCOUNTERED) || after.equals(PokedexEntryProgress.CAUGHT))) {
+                
+                if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), pokemon.getSpecies().getName())) {
+                    return false;
+                }
 
-            if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), event.getScannedPokemonEntityData().getPokemon().getSpecies().getName())) {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         @Override

@@ -22,14 +22,14 @@ public class HatchEggRequirement implements Requirement {
     public static final String ID = "hatch_egg";
 
     @YamlKey("pokename")
-    private String pokename = "any";
+    public String pokename = "any";
     @YamlKey("amount")
     private int amount = 1;
 
     @YamlKey("shiny") 
     private boolean shiny = false;
     @YamlKey("type")
-    private String type = "any";
+    public String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -65,7 +65,7 @@ public class HatchEggRequirement implements Requirement {
     public static class HatchEggProgression implements Progression<HatchEggEvent> {
 
         private PlayerProfile profile;
-        private HatchEggRequirement requirement;
+        public HatchEggRequirement requirement;
         private int progressAmount;
         private Challenge parentChallenge;
 

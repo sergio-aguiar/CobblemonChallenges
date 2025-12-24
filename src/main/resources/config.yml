@@ -23,9 +23,9 @@ Messages:
   requirements:
     # When listing a player's progress on a challenge, these will be the prefix for that
     progression-shorthand:
-      catch_pokemon: "{pokename} Captured"
-      evolve_pokemon: "{pokename} Evolved"
-      defeat_battler: "{battlerData} Defeated"
+      catch_pokemon: "{poketype}{pokename} Captured"
+      evolve_pokemon: "{poketype}{pokename} Evolved"
+      defeat_battler: "{poketype}{pokename} Defeated"
       harvest_apricorn: "Apricorns Harvested"
       harvest_berry: "Berries Harvested"
       mine_block: "{blockData} Blocks Mined"
@@ -34,13 +34,13 @@ Messages:
       pokemon_scanned: "Pokémon Scanned"
       pokemon_seen: "Pokémon Seen"
       milestone_time_played: "Seconds Passed"
-      use_rare_candy: "Rare Candies Used"
-      hatch_egg: "Eggs Hatched"
-      exp_gained: "EXP Gained"
-      level_up_once: "Levels Gained"
-      level_up_to: "Pokémon Leveled"
-      trades_completed: "Trades"
-      fossils_revived: "Fossils Revived"
+      use_rare_candy: "Candies Used On {pokename}"
+      hatch_egg: "{poketype}{pokename} Eggs Hatched"
+      exp_gained: "EXP Gained by {poketype}{pokename}"
+      level_up_once: "Levels Gained by {poketype}{pokename}"
+      level_up_to: "{poketype}{pokename} Pokémon Leveled"
+      trades_completed: "{poketype}{pokename} Trades Completed"
+      fossils_revived: "{poketype}{pokename} Fossils Revived"
       login: "Login"
       player_vote: "Voted"
   challenges:

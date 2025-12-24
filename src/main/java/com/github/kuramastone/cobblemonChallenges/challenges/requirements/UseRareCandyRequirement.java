@@ -15,7 +15,7 @@ public class UseRareCandyRequirement implements Requirement {
     public static final String ID = "use_rare_candy";
 
     @YamlKey("pokename")
-    private String pokename = "any"; // Default to "any" if not specified
+    public String pokename = "any"; // Default to "any" if not specified
     @YamlKey("amount")
     private int amount = 1;
 
@@ -41,7 +41,7 @@ public class UseRareCandyRequirement implements Requirement {
     public static class UseRareCandyOnProgression implements Progression<ExperienceCandyUseEvent> {
 
         private PlayerProfile profile;
-        private UseRareCandyRequirement requirement;
+        public UseRareCandyRequirement requirement;
         private int progressAmount;
         private Challenge parentChallenge;
 

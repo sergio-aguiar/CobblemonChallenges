@@ -29,7 +29,7 @@ public class CatchPokemonRequirement implements Requirement {
     @YamlKey("shiny") 
     private boolean shiny = false;
     @YamlKey("type")
-    private String type = "any";
+    public String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")

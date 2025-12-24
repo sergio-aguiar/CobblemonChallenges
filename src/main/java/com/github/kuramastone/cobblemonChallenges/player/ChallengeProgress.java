@@ -301,9 +301,96 @@ public class ChallengeProgress {
             String key = set.getKey();
             Progression<?> progression = set.getValue();
 
-            String displayName = api.getMessage(
-                "requirements.progression-shorthand.%s".formatted(key.toLowerCase())
-            ).getText();
+            String pokename = "";
+            String poketype = "";
+            String blockData = "";
+            if (set.getValue() instanceof CatchPokemonRequirement.CatchPokemonProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof EvolvePokemonRequirement.EvolvePokemonProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof DefeatBattlerRequirement.DefeatPokemonProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof EXPGainedRequirement.ExpGainedProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof FossilRevivedRequirement.FossilsRevivedProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof HatchEggRequirement.HatchEggProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof IncreaseLevelRequirement.IncreaseLevelProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof LevelUpToRequirement.LevelUpToProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof TradeCompletedRequirement.TradesCompletedProgression prog) {
+                pokename = prog.requirement.pokename;
+
+                if (!prog.requirement.type.equalsIgnoreCase("any")) {
+                    poketype = prog.requirement.type;
+                }
+            }
+            else if (set.getValue() instanceof UseRareCandyRequirement.UseRareCandyOnProgression prog) {
+                pokename = prog.requirement.pokename;
+            }
+            else if (set.getValue() instanceof MineBlockRequirement.MineBlockProgression mineBlockProgression)
+                blockData = getPrettyBlockTypeOfFirst(mineBlockProgression.requirement.blockType) + " ";
+            else if (set.getValue() instanceof PlaceBlockRequirement.PlaceBlockProgression placeBlockProgression)
+                blockData = getPrettyBlockTypeOfFirst(placeBlockProgression.requirement.blockType) + " ";
+
+            if (pokename.isEmpty() || pokename.trim().toLowerCase().startsWith("any")) {
+                pokename = "";
+            }
+
+            if (poketype.isEmpty() || poketype.trim().toLowerCase().startsWith("any")) {
+                poketype = "";
+            }
+
+            pokename = individualToUppers(pokename);
+            poketype = individualToUppers(poketype);
+
+            String displayName = api.getMessage("requirements.progression-shorthand.%s".formatted(key.toLowerCase())).getText()
+                .replace("{poketype}", poketype)
+                .replace("{pokename}", pokename)
+                .replace("{blockData}", blockData)
+                .replace("  ", " ");
 
             String progressString = progression.getProgressString().replace('&', '§');
             String line = displayName + ": §e" + progressString;

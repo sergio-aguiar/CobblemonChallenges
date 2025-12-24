@@ -21,14 +21,14 @@ public class LevelUpToRequirement implements Requirement {
     public static final String ID = "level_up_to";
 
     @YamlKey("pokename")
-    private String pokename = "any";
+    public String pokename = "any";
     @YamlKey("amount")
     private int amount = 1;
 
     @YamlKey("shiny")
     private boolean shiny = false;
     @YamlKey("type")
-    private String type = "any";
+    public String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -64,7 +64,7 @@ public class LevelUpToRequirement implements Requirement {
     public static class LevelUpToProgression implements Progression<LevelUpEvent> {
 
         private PlayerProfile profile;
-        private LevelUpToRequirement requirement;
+        public LevelUpToRequirement requirement;
         private int progressAmount;
         private Challenge parentChallenge;
 

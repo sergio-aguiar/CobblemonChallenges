@@ -21,14 +21,14 @@ public class EXPGainedRequirement implements Requirement {
     public static final String ID = "exp_gained";
 
     @YamlKey("pokename")
-    private String pokename = "any";
+    public String pokename = "any";
     @YamlKey("amount")
     private int amount = 1;
 
     @YamlKey("shiny") 
     private boolean shiny = false;
     @YamlKey("type")
-    private String type = "any";
+    public String type = "any";
     @YamlKey("ball")
     private String ball = "any";
     @YamlKey("time_of_day")
@@ -62,7 +62,7 @@ public class EXPGainedRequirement implements Requirement {
     public static class ExpGainedProgression implements Progression<ExperienceGainedEvent.Post> {
 
         private PlayerProfile profile;
-        private EXPGainedRequirement requirement;
+        public EXPGainedRequirement requirement;
         private int progressAmount;
         private Challenge parentChallenge;
 

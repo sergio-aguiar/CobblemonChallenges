@@ -22,7 +22,7 @@ public class PokemonScannedRequirement implements Requirement {
     @YamlKey("amount")
     private int amount = 1; // Number of Pokédex entries to complete
     @YamlKey(value = "pokename", required = false)
-    private String pokename = "any"; // Number of Pokédex entries to complete
+    private String pokename = "any";
 
     public PokemonScannedRequirement() {
     }

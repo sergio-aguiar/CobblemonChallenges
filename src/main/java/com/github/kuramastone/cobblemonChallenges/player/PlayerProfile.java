@@ -36,6 +36,7 @@ public class PlayerProfile {
     private Map<String, ChallengeListGUI> windowGUIMap;
     private List<CompletedChallenge> completedChallenges;
     private List<Reward> rewardsToGive;
+    private boolean dispensingRewards = false;
 
     public PlayerProfile(CobbleChallengeAPI api, UUID uuid) {
         this.api = api;
@@ -356,18 +357,24 @@ public class PlayerProfile {
     }
 
     private void dispenseRewards() {
-        syncPlayer();
-        if (playerEntity != null) {
-            for (Reward reward : rewardsToGive) {
-                try {
-                    if (reward != null)
-                        reward.applyTo(playerEntity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        if (dispensingRewards) return;
 
+        dispensingRewards = true;
+        try {
+            syncPlayer();
+            if (playerEntity == null) return;
+
+            List<Reward> snapshot = new ArrayList<>(rewardsToGive);
             rewardsToGive.clear();
+
+            for (Reward reward : snapshot) {
+                if (reward != null) reward.applyTo(playerEntity);
+            }
+        } catch (Exception e) {
+            CobbleChallengeMod.logger.info("Failed to distribute rewards to player %s (%s): %s".formatted(getUUID().toString(), getPlayerEntity().getName().getString(), e.getMessage()));
+            e.printStackTrace();
+        } finally {
+            dispensingRewards = false;
         }
     }
 

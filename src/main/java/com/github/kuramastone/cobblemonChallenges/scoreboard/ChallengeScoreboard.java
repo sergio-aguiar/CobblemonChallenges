@@ -29,6 +29,8 @@ public class ChallengeScoreboard {
     public static boolean showForPlayer(ServerPlayer player, PlayerProfile profile) {
         String playerObjectiveName = getPlayerObjectiveName(player);
 
+        if (playerObjectiveName.equals("")) return false;
+
         clearForPlayer(player, false);
 
         Objective objective = new Objective(
@@ -88,6 +90,8 @@ public class ChallengeScoreboard {
     public static void clearForPlayer(ServerPlayer player, boolean resetTracking) {
         String playerObjectiveName = getPlayerObjectiveName(player);
 
+        if (playerObjectiveName.equals("")) return;
+
         Objective objective = new Objective(
             new Scoreboard(),
             playerObjectiveName,
@@ -104,7 +108,11 @@ public class ChallengeScoreboard {
     }
 
     public static String getPlayerObjectiveName(ServerPlayer player) {
-        return BASE_OBJECTIVE_NAME + "_" + player.getUUID().toString().substring(0, 8);
+        try {
+            return BASE_OBJECTIVE_NAME + "_" + player.getUUID().toString().substring(0, 8);
+        } catch (NullPointerException e) {
+            return "";
+        }
     }
 
     public static boolean setTrackedChallenge(ServerPlayer player, ChallengeProgress progress) {

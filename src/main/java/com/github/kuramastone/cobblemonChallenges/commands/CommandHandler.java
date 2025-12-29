@@ -132,9 +132,13 @@ public class CommandHandler {
 
     private static int handleRestartAllCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         for (PlayerProfile profile : CobbleChallengeMod.instance.getAPI().getProfiles()) {
-            profile.AddDefaultSlotChallenges();
-            profile.resetMissingChallenges();
-            profile.resetChallenges();
+            try {
+                profile.AddDefaultSlotChallenges();
+                profile.resetMissingChallenges();
+                profile.resetChallenges();
+            } catch (Exception e) {
+                CobbleChallengeMod.logger.info("Failed to reset player %s (%s): %s".formatted(profile != null ? profile.getUUID().toString() : "null", profile != null ? profile.getPlayerEntity().getName().getString() : "null", e.getMessage()));
+            }
         }
 
         CobbleChallengeMod.instance.getAPI().saveProfiles();

@@ -129,6 +129,7 @@ public class CobbleChallengeMod implements ModInitializer {
                                                 profile.setAvailableSlotChallenge(cl.getName(), slot, replacement);
 
                                                 if (!replacement.doesNeedSelection()) {
+                                                    CobbleChallengeMod.logger.info("Player %s started unrestricted challenge %s.".formatted(profile.getPlayerEntity().getName().getString(), ch.getName()));
                                                     profile.addActiveChallenge(cl, replacement, replacement.getSlot());
                                                 }
 

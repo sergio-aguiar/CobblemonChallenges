@@ -35,8 +35,6 @@ public class PlayerProfile {
     private Map<String, Map<Integer, Challenge>> availableSlotChallenges; // challenges available to do for each slot
     private Map<String, ChallengeListGUI> windowGUIMap;
     private List<CompletedChallenge> completedChallenges;
-    private List<Reward> rewardsToGive;
-    private boolean dispensingRewards = false;
 
     public PlayerProfile(CobbleChallengeAPI api, UUID uuid) {
         this.api = api;
@@ -47,7 +45,6 @@ public class PlayerProfile {
         availableSlotChallenges = Collections.synchronizedMap(new HashMap<>());
         windowGUIMap = Collections.synchronizedMap(new HashMap<>());
         completedChallenges = Collections.synchronizedList(new ArrayList<>());
-        rewardsToGive = Collections.synchronizedList(new ArrayList<>());
 
         server = CobbleChallengeMod.getMinecraftServer();
         syncPlayer(); // try syncing player object
@@ -155,6 +152,7 @@ public class PlayerProfile {
                                     Map<Integer, Challenge> slotChallenges = availableSlotChallenges.getOrDefault(challengeList.getName(), Collections.emptyMap());
                                     Challenge slotChallenge = slotChallenges.get(challenge.getSlot());
                                     if (slotChallenge != null && slotChallenge.getName().equals(challenge.getName())) {
+                                        CobbleChallengeMod.logger.info("Player %s started unrestricted challenge %s.".formatted(playerEntity.getName().getString(), challenge.getName()));
                                         addActiveChallenge(challengeList, challenge, challenge.getSlot());
                                     }
                                 }
@@ -332,18 +330,14 @@ public class PlayerProfile {
         return playerEntity;
     }
 
-    public List<Reward> getRewardsToGive() {
-        return rewardsToGive;
-    }
-
-    public void completeChallenge(ChallengeList list, Challenge challenge) {
-        //double check that it isnt already completed
+    public synchronized void completeChallenge(ChallengeList list, Challenge challenge) {
         if (isChallengeCompleted(challenge.getName()))
             return;
 
-        rewardsToGive.addAll(challenge.getRewards());
+        addCompletedChallenge(list, challenge);
 
-        dispenseRewards();
+        dispenseRewards(challenge.getRewards());
+
         List<String> linesToSend = List.of(StringUtils.splitByLineBreak(api.getMessage("challenges.completed", "{challenge}", challenge.getDisplayName(), "{challenge-description}", challenge.getDescription()).getText()));
         List<String> formattedLines = StringUtils.centerStringListTags(linesToSend);
         for (String line : formattedLines) {
@@ -352,29 +346,19 @@ public class PlayerProfile {
         CobbleChallengeMod.logger.info("{} has completed the {} challenge!",
                 isOnline() ? playerEntity.getName().getString() : uuid.toString(),
                 challenge.getName());
-
-        addCompletedChallenge(list, challenge);
     }
 
-    private void dispenseRewards() {
-        if (dispensingRewards) return;
-
-        dispensingRewards = true;
+    private synchronized void dispenseRewards(List<Reward> rewardsToGive) {
         try {
             syncPlayer();
             if (playerEntity == null) return;
 
-            List<Reward> snapshot = new ArrayList<>(rewardsToGive);
-            rewardsToGive.clear();
-
-            for (Reward reward : snapshot) {
+            for (Reward reward : rewardsToGive) {
                 if (reward != null) reward.applyTo(playerEntity);
             }
         } catch (Exception e) {
             CobbleChallengeMod.logger.info("Failed to distribute rewards to player %s (%s): %s".formatted(getUUID().toString(), getPlayerEntity().getName().getString(), e.getMessage()));
             e.printStackTrace();
-        } finally {
-            dispensingRewards = false;
         }
     }
 
@@ -519,7 +503,6 @@ public class PlayerProfile {
     public void resetChallenges() {
         resetProgress();
         completedChallenges.clear();
-        rewardsToGive.clear();
 
         addUnrestrictedChallenges();
     }

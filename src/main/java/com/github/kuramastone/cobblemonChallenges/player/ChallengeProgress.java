@@ -53,12 +53,13 @@ public class ChallengeProgress {
         return Math.max(0, (startTime + activeChallenge.getMaxTimeInMilliseconds()) - System.currentTimeMillis());
     }
 
-    private void completedActiveChallenge() {
+    private synchronized void completedActiveChallenge() {
         if (activeChallenge == null) {
             return;
         }
-        profile.completeChallenge(parentList, activeChallenge);
+
         profile.removeActiveChallenge(this);
+        profile.completeChallenge(parentList, activeChallenge);
 
         ChallengeListener.onChallengeCompleted(new ChallengeCompletedEvent(profile, parentList, activeChallenge));
     }

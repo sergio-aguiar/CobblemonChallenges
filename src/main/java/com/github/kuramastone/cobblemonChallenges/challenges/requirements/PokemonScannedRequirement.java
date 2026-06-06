@@ -87,7 +87,7 @@ public class PokemonScannedRequirement implements Requirement {
             PokedexEntryProgress before = event.getPokedexManager().getKnowledgeForSpecies(pokemon.getSpecies().getResourceIdentifier());
             PokedexEntryProgress after = event.getKnowledge();
             
-            if (before.equals(PokedexEntryProgress.NONE) && (after.equals(PokedexEntryProgress.ENCOUNTERED) || after.equals(PokedexEntryProgress.CAUGHT))) {
+            if (before.equals(PokedexEntryProgress.UNREGISTERED) && (after.equals(PokedexEntryProgress.SEEN) || after.equals(PokedexEntryProgress.OWNED))) {
                 
                 if (!StringUtils.doesStringContainCategory(requirement.pokename.split("/"), pokemon.getSpecies().getName())) {
                     return false;
